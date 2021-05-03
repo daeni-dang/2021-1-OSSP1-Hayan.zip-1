@@ -15,8 +15,9 @@
             </div>
             <div id="main">
                 <div id="left">
-                    <form id="input">
-                        <textarea id="inputStr" class="text" cols="43" row="100"></textarea>
+                    <form id="input" method="post">
+                        {% csrf_token %}
+                        <textarea id="inputStr" name='inputStr' class="text" cols="43" row="100">{{text}}</textarea>
                         <input class="btn" type="submit" value="분석하기">
                     </form>
                 </div>
