@@ -1,12 +1,104 @@
 <!DOCTYPE html>
-{% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Test</title>
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
-</head>
-<body>
-  <h1>Hello World!</h1>
-</body>
+<html lang="kr">
+    <head>
+        <meta charset="utf-8">
+        <title>test</title>
+        {% load static %}
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="stt">
+                <button id="micToggle" class="btn" data-badge="&nbsp;">암기 시작</button>
+                <span id="finalStr"></span>
+                <span id="interim"></span>
+            </div>
+            <div id="main">
+                <div id="left">
+                    <form id="input">
+                        <textarea id="inputStr" class="text" cols="43" row="100"></textarea>
+                        <input class="btn" type="submit" value="분석하기">
+                    </form>
+                </div>
+                <div id="right">
+                    <div id="result">
+                        <textarea id="resultStr" class="text" cols="43" row="100" readonly>비교 결과 출력</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            const LANG = 'ko-KR';
+
+            const MIC_TOGGLE_DOM = document.getElementById('micToggle');
+
+            const FINAL_STR_DOM = document.getElementById('finalStr');
+            const INTERIM_DOM = document.getElementById('interim');
+
+            var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+            var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+            var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+
+            var recognition = null;
+
+
+            var is_mic_on = false;
+
+            function initRecognition() {
+                recognition = new SpeechRecognition();
+                recognition.lang = LANG;
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.maxAlternatives = 1;
+
+
+                recognition.onresult = function (event) {
+                    var interim = '';
+                    var final_str = '';
+                    var confidence = 0;
+                    var final_count = 0;
+
+                    for (var i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            final_str += event.results[i][0].transcript;
+                            confidence += event.results[i][0].confidence;
+                            final_count += 1;
+                        } else {
+                            interim += event.results[i][0].transcript;
+                        }
+                    }
+
+                    updateCaption(final_str.trim(), interim.trim(), confidence);
+                };
+
+
+                MIC_TOGGLE_DOM.addEventListener('click', function () {
+                    toggleMic();
+                });
+            }
+
+            function toggleMic() {
+                if (is_mic_on) {
+                    is_mic_on = false;
+                    MIC_TOGGLE_DOM.textContent = '암기 시작';
+                    recognition.abort();
+                } else {
+                    is_mic_on = true;
+                    MIC_TOGGLE_DOM.textContent = '암기 종료';
+                    recognition.start();
+                }
+            }
+
+
+            function updateCaption(final_str, interim, confidence) {
+
+
+                FINAL_STR_DOM.textContent = final_str;
+                INTERIM_DOM.textContent = interim;
+
+            }
+
+            initRecognition();
+        </script>
+    </body>
 </html>
