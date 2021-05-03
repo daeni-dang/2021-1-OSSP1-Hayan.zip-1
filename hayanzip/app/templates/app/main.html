@@ -17,7 +17,7 @@
                 <div id="left">
                     <form id="input" method="post">
                         {% csrf_token %}
-                        <textarea id="inputStr" name='inputStr' class="text" cols="43" row="100">{{text}}</textarea>
+                        <textarea id="inputStr" name='inputStr' class="text" cols="43" row="100" placeholder="대본을 입력해주세요.">{{text}}</textarea>
                         <input class="btn" type="submit" value="분석하기">
                     </form>
                 </div>
