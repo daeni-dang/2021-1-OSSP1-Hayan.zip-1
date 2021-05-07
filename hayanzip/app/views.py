@@ -97,3 +97,14 @@ def find_verb(string_table):
             for k in range(start_flag, len(string_table[i])): #start_flag부터 끝까지 서술어
                 print(string_table[i][k], end=' ')
             print()
+
+# 보어를 찾는 함수 : 보격 조사를 찾고 보격 조사 앞에 있는 단어 + 보격 조사를 보어로 반환
+def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 판별 X)
+    mecab = Mecab()
+    temp_string = mecab.pos(input_string)
+    complementArr = []
+    for i in range(len(temp_string)):
+        if temp_string[i][1].find('JKC') != -1:  # 형태소 분석을 한 결과에서 보격 조사를 찾음
+            complementArr.append(temp_string[i - 1])
+            complementArr.append(temp_string[i])  # 보격 조사와 그 앞의 단어가 보어이므로 두 개 모두 list에 넣어줌
+    return complementArr  # 한 문장 안에 보어가 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
