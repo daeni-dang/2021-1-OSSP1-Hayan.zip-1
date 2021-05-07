@@ -103,6 +103,8 @@ def sentence_division(input_string):
     for i in range(len(string_table)):  # 테이블 출력
         print(string_table[i])
     find_verb(string_table)
+    find_s(string_table)
+    find_o(string_table)
 
     # 문제! : 다은이 -> 다(MAG) + 은이(NNG) : MAG 삭제
     return string_table
@@ -157,8 +159,7 @@ def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 
                 if temp_string[i - 1] == temp_string[
                     len(temp_string) - 1]:  # 여러 개의 관형형 전성어미가 나올 경우 띄어쓰기로 각각을 구분하기 때문에 맨 앞의 관형형 전성어미에 대한 예외처리
                     tubularArr.append(temp_string[i])
-                elif input_string[
-                    inputIndex - 1] != ' ':  # 관형형 전성어미가 다른 형태소와 합성되어 있으며 그 앞에 다른 형태소가 나오는 경우 관형형 전성어미의 앞의 단어도 list에 추가(ex.('깨끗', 'XR'), ('한', 'XSA+ETM'))
+                elif input_string[inputIndex - 1] != ' ':  # 관형형 전성어미가 다른 형태소와 합성되어 있으며 그 앞에 다른 형태소가 나오는 경우 관형형 전성어미의 앞의 단어도 list에 추가(ex.('깨끗', 'XR'), ('한', 'XSA+ETM'))
                     tubularArr.append(temp_string[i - 1])
                     tubularArr.append(temp_string[i])
                 else:  # 관형형 전성어미가 붙어서 한번에 나오는 경우 그 단어만 관형어 list에 추가(ex.('아름다운', 'VA+ETM'))
@@ -190,3 +191,65 @@ def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 
         #                 k += 1
 
     return tubularArr  # 한 문장 안에 관형어는 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
+
+# 주어 찾는 함수
+def find_s(string_table):
+    s_table=[] #주어들만 저장할 테이블
+    cnt=0
+    jx_cnt=0
+    for i in range(len(string_table)): #테이블 전체에서
+        for k in range(len(string_table[i])):  #테이블에 저장된 한 문장 길이 동안
+            if ((string_table[i][k][0] =='가'and string_table[i][k][1] =='JKS') or (string_table[i][k][0] =='이'and string_table[i][k][1] =='JKS')):
+                #가,이 중 주격 조사인 것들에 한해
+                for m in range(0, k-1): #주격 조사 앞에 있는 것들중
+                    if (string_table[i][m][1]=='NNG' or string_table[i][m][1]=='NNP'or string_table[i][m][1]=='NNB' or string_table[i][m][1]=='NP'):
+                        #명사에 해당 되는 것들 중에
+                        cnt=m    # 가장 주격 조사에 가까운 것을
+                s_table.append(string_table[i][cnt])  #주어라고 저장
+               # s_table.append(string_table[i][k])   #주어 뒤에 조사(확인용)
+
+            if ((string_table[i][k][0] =='은'and string_table[i][k][1] =='JX') or (string_table[i][k][0] =='는'and string_table[i][k][1] =='JX')):
+                #은, 는 중 보조사 인것들에 한해
+                jks_cnt = -1 # 주격조사count변수
+                for x in range(len(string_table[i])):# 테이블의 i번째 문장 길이동안
+                    if (string_table[i][x][1]=='JKS'): # jsk(주격 조사가 있으면)
+                        jks_cnt +=1  #count변수++
+                if (jks_cnt<0): #만약 주격 조사가 없으면
+                    for z in range(0, k - 1):  # 은, 는 앞에 있는 것들중
+                        if (string_table[i][z][1] == 'NNG' or string_table[i][z][1] == 'NNP' or string_table[i][z][1] == 'NNB' or string_table[i][z][1] == 'NP'):
+                                # 명사에 해당 되는 것들 중에
+                            jx_cnt = z  # 가장 주격 조사에 가까운 것을
+                    s_table.append(string_table[i][jx_cnt])# 주어라고 저장
+                   # s_table.append(string_table[i][k])   #주어 뒤에 조사(확인용)
+    print("주어:")
+    for j in range(len(s_table)):
+        print(s_table[j])
+
+    return s_table
+
+#목적어 찾는 함수
+def find_o(string_table):
+    cnt=0
+    o_table=[] #목적어들만 저장할 테이블
+    for i in range(len(string_table)):#문장 테이블 전체에서
+        for k in range(len(string_table[i])):# 문장 한문장 안에
+            if ((string_table[i][k][0] =='을' and string_table[i][k][1] =='JKO') or (string_table[i][k][0] =='를'and string_table[i][k][1] =='JKO')):
+                #을를 인데 목적격 조사인 것이 나오면
+                o_table.append(string_table[i][k-1])# 목적어 라고 저장
+                #o_table.append(string_table[i][k])# 목적어 뒤에 조사(확인용)
+
+            if ((string_table[i][k][0] =='은'and string_table[i][k][1] =='JX') or (string_table[i][k][0] =='는'and string_table[i][k][1] =='JX')):
+                #은 는 인데 보조사 인 경우
+                jks_cnt = -1 # 주격조사를 count
+                for x in range(len(string_table[i])):  # 테이블의 i번째 문장 길이동안
+                    if (string_table[i][x][1] == 'JKS'):  # jsk(주격 조사가 있으면)
+                        jks_cnt += 1  # count변수++
+                if (jks_cnt>=0): #주격 조사가 있으면
+                    o_table.append(string_table[i][k - 1]) #조사 앞을 목적어라고 저장
+                    #o_table.append(string_table[i][k]) #목적어 뒤에 조사(확인용)
+
+    print("목적어:")
+    for j in range(len(o_table)):
+        print(o_table[j])
+
+    return o_table
