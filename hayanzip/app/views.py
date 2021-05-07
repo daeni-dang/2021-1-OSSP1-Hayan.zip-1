@@ -3,8 +3,18 @@ from eunjeon import Mecab
 
 
 # Create your views here.
+global script_table
+global voice_table
+global index
+script_table = []
+voice_table = []
+index = 0
 
 def main(request):
+    global script_table
+    global voice_table
+    global index
+
     if request.method == 'POST':
         str = request.POST.get('final_str', None)
         if str == None:  # 대본 입력됐을 경우
@@ -13,7 +23,11 @@ def main(request):
             script_string_array = sentence_without_part(text, script_table) #형태소 없는 배열
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
-            sentence_division(str)  # 음성인식 됐을 경우
+            voice_table = sentence_division(str)  # 음성인식 됐을 경우
+            for i in range(0, len(voice_table)):
+                flag = 0
+                print(script_table[index])
+
     return render(request, 'app/main.html')
 
 
