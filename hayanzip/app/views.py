@@ -1,26 +1,29 @@
 from django.shortcuts import render
 from eunjeon import Mecab
 
+
 # Create your views here.
 
 def main(request):
     if request.method == 'POST':
         str = request.POST.get('final_str', None)
-        if str == None :    #대본 입력됐을 경우
+        if str == None:  # 대본 입력됐을 경우
             text = request.POST['inputStr']
             sentence_division(text)
             return render(request, 'app/main.html', {'text': text})
         else:
-            sentence_division(str) #음성인식 됐을 경우
-    return render(request,'app/main.html')
+            sentence_division(str)  # 음성인식 됐을 경우
+    return render(request, 'app/main.html')
 
-def add_space_after_mot(input_string):      # '못' 뒤에 띄어쓰기 추가하는 함수 : '못'을 기준으로 split한 후, 각 요소 사이에 '못+공백'을 추가하여 합침.
+
+def add_space_after_mot(input_string):  # '못' 뒤에 띄어쓰기 추가하는 함수 : '못'을 기준으로 split한 후, 각 요소 사이에 '못+공백'을 추가하여 합침.
     split_neg = input_string.split('못')
     for i in range(len(split_neg)):
         string = '못 '.join(split_neg)
     return string
 
-def is_sentence_End(last_token):        # 문장의 마지막인지 판단 : EF[종결어미] 이거나 EC(연결어미)로 분석된 마지막 요소
+
+def is_sentence_End(last_token):  # 문장의 마지막인지 판단 : EF[종결어미] 이거나 EC(연결어미)로 분석된 마지막 요소
     # find('str')는 str의 위치를 반환하는 함수. 없을 때는 -1 반환
     # 문장의 마지막 형태소일 때(즉, EF[종결어미]를 만났을 때)
     # 혹은 EC일 경우, '다','요','까'의 경우 종결어미로 인식
@@ -30,28 +33,33 @@ def is_sentence_End(last_token):        # 문장의 마지막인지 판단 : EF[
     else:
         return False
 
-def is_MAG_except_neg(token):       # '못', '안'을 제외한 MAG[일반 부사]인가 판단
+
+def is_MAG_except_neg(token):  # '못', '안'을 제외한 MAG[일반 부사]인가 판단
     if token[1] == 'MAG':
         if token[0] != '못' and token[0] != '안':
             return True
     return False
 
-def is_mark(token):          # 문장부호(. ? ! , · / : )인지 판단
+
+def is_mark(token):  # 문장부호(. ? ! , · / : )인지 판단
     if token[1] == 'SF' or token[1] == 'SC':
         return True
     return False
 
+
 def is_type_of_V(token):
-    if token[1].find('V') != -1 :
+    if token[1].find('V') != -1:
         return True
     else:
         return False
 
+
 def is_NNG(token):
-    if token[1].find('NNG') != -1 :
+    if token[1].find('NNG') != -1:
         return True
     else:
         return False
+
 
 def sentence_division(input_string):
     mecab = Mecab()
@@ -82,21 +90,22 @@ def sentence_division(input_string):
 
 
 def find_verb(string_table):
-    for i in range(0,len(string_table)):
+    for i in range(0, len(string_table)):
         start_flag = -1  # 서술어의 시작 플래그 초기화
-        for j in range(0,len(string_table[i])):
-            if start_flag== -1 and is_type_of_V(string_table[i][j]): #문장 요소에 V가 있다면
-                start_flag= j # 시작 플래그는 현재 토큰 index
-            elif is_NNG(string_table[i][j]): #문장 요소에 N이 있다면
-                start_flag= -1  #서술어가 아니므로 start_flag = -1
-        if start_flag!=-1:  #start_flag가 -1이면 서술어가 없다는 것
-            if start_flag>0: #start flag가 0이라면 앞에 것 볼 필요X
-                if is_NNG(string_table[i][start_flag-1]): #start_flag 앞의 토큰이 명사라면
-                    start_flag-=1 #시작 플래그를 하나 줄인다.
+        for j in range(0, len(string_table[i])):
+            if start_flag == -1 and is_type_of_V(string_table[i][j]):  # 문장 요소에 V가 있다면
+                start_flag = j  # 시작 플래그는 현재 토큰 index
+            elif is_NNG(string_table[i][j]):  # 문장 요소에 N이 있다면
+                start_flag = -1  # 서술어가 아니므로 start_flag = -1
+        if start_flag != -1:  # start_flag가 -1이면 서술어가 없다는 것
+            if start_flag > 0:  # start flag가 0이라면 앞에 것 볼 필요X
+                if is_NNG(string_table[i][start_flag - 1]):  # start_flag 앞의 토큰이 명사라면
+                    start_flag -= 1  # 시작 플래그를 하나 줄인다.
             print('V:', end=' ')
-            for k in range(start_flag, len(string_table[i])): #start_flag부터 끝까지 서술어
+            for k in range(start_flag, len(string_table[i])):  # start_flag부터 끝까지 서술어
                 print(string_table[i][k], end=' ')
             print()
+
 
 # 보어를 찾는 함수 : 보격 조사를 찾고 보격 조사 앞에 있는 단어 + 보격 조사를 보어로 반환
 def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 판별 X)
@@ -108,6 +117,7 @@ def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 �
             complementArr.append(temp_string[i - 1])
             complementArr.append(temp_string[i])  # 보격 조사와 그 앞의 단어가 보어이므로 두 개 모두 list에 넣어줌
     return complementArr  # 한 문장 안에 보어가 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
+
 
 # 관형어를 찾는 함수 : 관형격 조사를 통해 관형어를 찾는 경우, 관형사를 관형어로 찾는 경우, 관형형 전성어미를 통해 관형어를 찾는 경우로 구성
 def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 친구를 만났다)와 체언의 자격을 가진 말 + 관형격 조사의 경우(ex.그는 웃기기의 천재다) 아직 처리 X)
@@ -139,5 +149,26 @@ def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 
                 tubularArr.append(temp_string[i - 1])
                 tubularArr.append(temp_string[i])
 
+        # 체언의 자격을 가진 말 + 관형격 조사의 경우(ex.그는 웃기기의 천재다)에 대한 코드(아직 수정-ing)
+        # if temp_string[i][1].find('JKG') != -1:
+        #     jkgWord = temp_string[i][0]
+        #     inputIndex = input_string.find(jkgWord)
+        #     tubularTemp = ""
+        #     for j in reversed(range(inputIndex)):
+        #         if input_string[j] != ' ':
+        #             tubularTemp = tubularTemp + input_string[j]
+        #         elif input_string[j] == ' ':
+        #             break
+        #         elif j == 0:
+        #             break
+        #     tt = tubularTemp[::-1]
+        #     print(tt)
+        #     for k in range(len(temp_string)):
+        #         if temp_string[k][0].find(tt[0]) != -1:
+        #             while True:
+        #                 print(temp_string[k])
+        #                 if temp_string[k][1] == 'JKG':
+        #                     break
+        #                 k += 1
 
     return tubularArr  # 한 문장 안에 관형어는 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
