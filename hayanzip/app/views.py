@@ -27,6 +27,14 @@ def main(request):
             for i in range(0, len(voice_table)):
                 flag = 0
                 print(script_table[index])
+                for j in range(0, len(script_table[index])):
+                    if script_table[index][j][0] == voice_table[i][j][0]:
+                        flag += 1
+                if flag == len(script_table[index]):
+                    print("같음")
+                else:
+                    print("틀림")
+                index += 1
 
     return render(request, 'app/main.html')
 
