@@ -108,3 +108,36 @@ def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 �
             complementArr.append(temp_string[i - 1])
             complementArr.append(temp_string[i])  # 보격 조사와 그 앞의 단어가 보어이므로 두 개 모두 list에 넣어줌
     return complementArr  # 한 문장 안에 보어가 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
+
+# 관형어를 찾는 함수 : 관형격 조사를 통해 관형어를 찾는 경우, 관형사를 관형어로 찾는 경우, 관형형 전성어미를 통해 관형어를 찾는 경우로 구성
+def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 친구를 만났다)와 체언의 자격을 가진 말 + 관형격 조사의 경우(ex.그는 웃기기의 천재다) 아직 처리 X)
+    mecab = Mecab()
+    temp_string = mecab.pos(input_string)
+    tubularArr = []
+
+    for i in range(len(temp_string)):
+        if temp_string[i][1].find('JKG') != -1:  # 관형격 조사를 통해 관형어를 찾음. 관형격 조사와 그 앞의 단어는 관형어이므로 이를 list에 추가
+            tubularArr.append(temp_string[i - 1])
+            tubularArr.append(temp_string[i])
+
+        if temp_string[i][1].find('MM') != -1:  # 관형사를 관형어로 판단. 관형사를 list에 추가
+            tubularArr.append(temp_string[i])
+
+        if temp_string[i][1].find('ETM') != -1:  # 관형형 전성어미를 통해 관형어를 찾음
+            if temp_string[i][1].find('+') != -1:  # 관형형 전성어미가 다른 형태소에 포함되어 나오는 경우(ex.('못생긴', 'VA+ETM'))
+                inputIndex = input_string.find(temp_string[i][0])
+                if temp_string[i - 1] == temp_string[
+                    len(temp_string) - 1]:  # 여러 개의 관형형 전성어미가 나올 경우 띄어쓰기로 각각을 구분하기 때문에 맨 앞의 관형형 전성어미에 대한 예외처리
+                    tubularArr.append(temp_string[i])
+                elif input_string[
+                    inputIndex - 1] != ' ':  # 관형형 전성어미가 다른 형태소와 합성되어 있으며 그 앞에 다른 형태소가 나오는 경우 관형형 전성어미의 앞의 단어도 list에 추가(ex.('깨끗', 'XR'), ('한', 'XSA+ETM'))
+                    tubularArr.append(temp_string[i - 1])
+                    tubularArr.append(temp_string[i])
+                else:  # 관형형 전성어미가 붙어서 한번에 나오는 경우 그 단어만 관형어 list에 추가(ex.('아름다운', 'VA+ETM'))
+                    tubularArr.append(temp_string[i])
+            else:  # 관형형 전성어미가 다른 형태소에 포함되지 않고 나오는 경우(ex.('작', 'VA'), ('은', 'ETM'))
+                tubularArr.append(temp_string[i - 1])
+                tubularArr.append(temp_string[i])
+
+
+    return tubularArr  # 한 문장 안에 관형어는 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
