@@ -5,12 +5,11 @@ from eunjeon import Mecab
 
 def main(request):
     if request.method == 'POST':
-        #text = request.POST['inputStr']
-        #sentence_division(text)
-        #return render(request, 'app/main.html', {'text': text})
         str = request.POST.get('final_str', None)
         if str == None :
-            print("No str")
+            text = request.POST['inputStr']
+            sentence_division(text)
+            return render(request, 'app/main.html', {'text': text})
         else:
             sentence_division(str)
     return render(request,'app/main.html')
