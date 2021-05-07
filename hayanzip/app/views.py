@@ -105,6 +105,7 @@ def sentence_division(input_string):
     find_verb(string_table)
     find_s(string_table)
     find_o(string_table)
+    find_tense(string_table)
 
     # 문제! : 다은이 -> 다(MAG) + 은이(NNG) : MAG 삭제
     return string_table
@@ -253,3 +254,49 @@ def find_o(string_table):
         print(o_table[j])
 
     return o_table
+
+# 찾고자 하는 문자('했' 같은 것)가 있는지 판단하는 함수
+def is_have_char(what_find, token):
+    if token[0].find(what_find) != -1:
+        return True
+    else:
+        return False
+
+# 찾고자 하는 태그('EF' 같은 것)가 있는지 판단하는 함수
+def is_have_tag(what_find, token):
+    if token[1].find(what_find) != -1:
+        return True
+    else:
+        return False
+
+# 시제 찾는 함수
+def find_tense(string_table):
+    tense_table = [] # 문자열과 시제를 함께 저장할 테이블
+    for i in range(len(string_table)):
+        special_future = 0 # '것','이'를 처리하기 위한 변수
+        for j in range(len(string_table[i])):
+            # 미래시제 1: '것''이'
+            if is_have_tag('NNB', string_table[i][j]):
+                special_future = special_future + 1 # NNB 는 '것'이므로 ++함
+            if is_have_tag('VCP', string_table[i][j]):
+                special_future = special_future + 1 # VCP 는 '이'이므로 ++함
+            if special_future == 2: # '것'과 '이'가 모두 존재하면 미래 시제로 판단
+                tense_table.append(string_table[i])
+                tense_table.append('future')
+                break
+            if is_have_tag('EP', string_table[i][j]):
+                # 미래시제 2: '겠'
+                if is_have_char('겠', string_table[i][j]):
+                    tense_table.append(string_table[i])
+                    tense_table.append('future')
+                # 과거시제
+                else:
+                    tense_table.append(string_table[i])
+                    tense_table.append('past')
+                # print(string_table[i][j])
+                break
+
+    return tense_table
+    # 추가 사항
+    # '먹을 것이다'와 '먹는 것이다'를 구별할 수가 없음.
+    # -> 파이썬 jamo 패키지 사용하면 초중종성 분리해서 'ㄹ' 찾아서 미래 처리 가능
