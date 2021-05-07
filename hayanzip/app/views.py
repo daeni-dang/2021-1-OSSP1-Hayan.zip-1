@@ -43,8 +43,9 @@ def main(request):
                         flag = 0
                         print(script_table[index])
                         for j in range(0, len(script_table[index])):
-                            if script_table[index][j][0] == voice_table[k][j][0]:
-                                flag += 1
+                            if j < len(voice_table[k]):
+                                if script_table[index][j][0] == voice_table[k][j][0]:
+                                    flag += 1
                         if flag == len(script_table[index]):
                             print("같음")
                         else:
