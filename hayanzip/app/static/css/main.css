@@ -48,3 +48,13 @@
     resize: none;
     border: 1px solid black;
 }
+.white-text{
+    -webkit-user-select: none;
+    color:white;
+}
+.red-text{
+    color:red;
+}
+.green-text{
+    color:green;
+}

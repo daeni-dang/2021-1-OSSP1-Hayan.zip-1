@@ -9,8 +9,9 @@ def main(request):
         str = request.POST.get('final_str', None)
         if str == None:  # 대본 입력됐을 경우
             text = request.POST['inputStr']
-            sentence_division(text)
-            return render(request, 'app/main.html', {'text': text})
+            script_table = sentence_division(text)
+            script_string_array = sentence_without_part(text, script_table)
+            return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
             sentence_division(str)  # 음성인식 됐을 경우
     return render(request, 'app/main.html')
@@ -60,6 +61,22 @@ def is_NNG(token):
     else:
         return False
 
+def sentence_without_part(input_string, string_table):
+    sentences=[]
+    for i in range(0,len(string_table)):
+        sentence = ''
+        for j in range(0, len(string_table[i])):
+            index = input_string.find(string_table[i][j][0])
+            index += len(string_table[i][j][0])
+            if index < len(input_string):
+                if input_string[index]=='.':
+                    index += 1;
+            if is_sentence_End(string_table[i][j]) :
+                sentence+=input_string[:index]
+                input_string=input_string[index:]
+                break
+        sentences.append(sentence)
+    return sentences
 
 def sentence_division(input_string):
     mecab = Mecab()
@@ -87,7 +104,7 @@ def sentence_division(input_string):
     find_verb(string_table)
 
     # 문제! : 다은이 -> 다(MAG) + 은이(NNG) : MAG 삭제
-
+    return string_table
 
 def find_verb(string_table):
     for i in range(0, len(string_table)):

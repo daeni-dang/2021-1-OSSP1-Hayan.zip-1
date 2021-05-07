@@ -24,7 +24,11 @@
                 </div>
                 <div id="right">
                     <div id="result">
-                        <textarea id="resultStr" class="text" cols="43" row="100" readonly>비교 결과 출력</textarea>
+                        <div id="resultStr" class="text" cols="43" row="100">
+                        {% for i in script_string_array %}
+                            <span id="script{{forloop.counter0}}" class="white-text">{{i}}</span>
+                        {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
