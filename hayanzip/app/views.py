@@ -5,9 +5,11 @@ from eunjeon import Mecab
 
 def main(request):
     if request.method == 'POST':
-        text = request.POST['inputStr']
-        sentence_division(text)
-        return render(request, 'app/main.html', {'text': text})
+        #text = request.POST['inputStr']
+        #sentence_division(text)
+        #return render(request, 'app/main.html', {'text': text})
+        str = request.POST.get('final_str', None)
+        sentence_division(str)
     return render(request,'app/main.html')
 
 def add_space_after_mot(input_string):      # '못' 뒤에 띄어쓰기 추가하는 함수 : '못'을 기준으로 split한 후, 각 요소 사이에 '못+공백'을 추가하여 합침.

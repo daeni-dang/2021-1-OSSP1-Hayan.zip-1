@@ -5,6 +5,7 @@
         <title>test</title>
         {% load static %}
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     </head>
     <body>
         <div id="wrapper">
@@ -93,7 +94,17 @@
 
             function updateCaption(final_str, interim, confidence) {
 
+                if(FINAL_STR_DOM.textContent != final_str && final_str != '')
+                {
 
+                    $.ajax({
+                        url: "{% url 'main' %}",
+                        data: {'final_str': final_str,  csrfmiddlewaretoken: '{{ csrf_token }}'},
+                        type: "POST",
+                        dataType: "json",
+                        success: function(response){}
+                    });
+                }
                 FINAL_STR_DOM.textContent = final_str;
                 INTERIM_DOM.textContent = interim;
 
