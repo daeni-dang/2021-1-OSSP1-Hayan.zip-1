@@ -25,8 +25,7 @@ def is_sentence_End(last_token):        # 문장의 마지막인지 판단 : EF[
     # 문장의 마지막 형태소일 때(즉, EF[종결어미]를 만났을 때)
     # 혹은 EC일 경우, '다','요','까'의 경우 종결어미로 인식
     if last_token[1].find('EF') != -1 \
-            or (last_token[1].find('EC') != -1
-                and (last_token[0].find('다') != -1 or last_token[0].find('요') != -1 or last_token[0].find('까') != -1) ):
+            or last_token[1].find('EC') != -1:
         return True
     else:
         return False
