@@ -26,6 +26,7 @@ def main(request):
             text = request.POST['inputStr']
             script_table = sentence_division(text) #형태소 포함된 배열
             script_string_array = sentence_without_part(text, script_table) #형태소 없는 배열
+            index = 0
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
             mecab_result = mecab.pos(str)
