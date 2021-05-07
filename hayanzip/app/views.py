@@ -9,8 +9,8 @@ def main(request):
         str = request.POST.get('final_str', None)
         if str == None:  # 대본 입력됐을 경우
             text = request.POST['inputStr']
-            script_table = sentence_division(text)
-            script_string_array = sentence_without_part(text, script_table)
+            script_table = sentence_division(text) #형태소 포함된 배열
+            script_string_array = sentence_without_part(text, script_table) #형태소 없는 배열
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
             sentence_division(str)  # 음성인식 됐을 경우
@@ -62,20 +62,21 @@ def is_NNG(token):
         return False
 
 def sentence_without_part(input_string, string_table):
-    sentences=[]
+    #형태소 구분 없이 문자열로만 string 문장 구분
+    sentences=[]    #구분된 문장들 담을 배열
     for i in range(0,len(string_table)):
-        sentence = ''
+        sentence = ''   #한 문장 저장할 문자열
         for j in range(0, len(string_table[i])):
-            index = input_string.find(string_table[i][j][0])
-            index += len(string_table[i][j][0])
-            if index < len(input_string):
-                if input_string[index]=='.':
-                    index += 1;
-            if is_sentence_End(string_table[i][j]) :
-                sentence+=input_string[:index]
-                input_string=input_string[index:]
+            if is_sentence_End(string_table[i][j]) :    #문장의 끝이라면
+                index = input_string.find(string_table[i][j][0]) #문장의 끝 요소 index 찾음
+                index += len(string_table[i][j][0]) #해당 문자까지 출력할 것이므로 그 문자의 길이만큼 index 증가
+                if index < len(input_string):   #만약 마지막 요소가 아니라면
+                    if input_string[index] == '.' or input_string[index] == ',':    #다음 요소가 .이나 ,일 때
+                        index += 1; #해당 문자도 포함하기 위해 index 1 증가
+                sentence=input_string[:index]  #처음부터 끝까지 문장 저장
+                input_string=input_string[index:]   #저장한 문장은 제외
                 break
-        sentences.append(sentence)
+        sentences.append(sentence)  #문장 추가
     return sentences
 
 def sentence_division(input_string):
