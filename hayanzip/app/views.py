@@ -1,19 +1,24 @@
 from django.shortcuts import render
 from eunjeon import Mecab
-
+import queue
 
 # Create your views here.
 global script_table
 global voice_table
 global index
+global q
 script_table = []
 voice_table = []
 index = 0
+q = queue.Queue()
 
 def main(request):
     global script_table
     global voice_table
     global index
+    global q
+
+    mecab = Mecab()
 
     if request.method == 'POST':
         str = request.POST.get('final_str', None)
@@ -23,18 +28,27 @@ def main(request):
             script_string_array = sentence_without_part(text, script_table) #형태소 없는 배열
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
-            voice_table = sentence_division(str)  # 음성인식 됐을 경우
-            for i in range(0, len(voice_table)):
-                flag = 0
-                print(script_table[index])
-                for j in range(0, len(script_table[index])):
-                    if script_table[index][j][0] == voice_table[i][j][0]:
-                        flag += 1
-                if flag == len(script_table[index]):
-                    print("같음")
-                else:
-                    print("틀림")
-                index += 1
+            mecab_result = mecab.pos(str)
+            for i in range(len(mecab_result)):
+                q.put(mecab_result[i][0])
+                if is_sentence_End(mecab_result[i]):
+                    print(mecab_result[i])
+                    one_sentence = ""
+                    for j in range(0, q.qsize()):
+                        one_sentence += q.get()
+                    voice_table = sentence_division(one_sentence)
+
+                    for k in range(0, len(voice_table)):
+                        flag = 0
+                        print(script_table[index])
+                        for j in range(0, len(script_table[index])):
+                            if script_table[index][j][0] == voice_table[k][j][0]:
+                                flag += 1
+                        if flag == len(script_table[index]):
+                            print("같음")
+                        else:
+                            print("틀림")
+                        index += 1
 
     return render(request, 'app/main.html')
 
