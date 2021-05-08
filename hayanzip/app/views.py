@@ -296,7 +296,12 @@ def is_have_tag(what_find, token):
 
 # 시제 찾는 함수
 def find_tense(string_table):
-    tense_table = [] # 문자열과 시제를 함께 저장할 테이블
+    tense_table = [['past', ], ['future', ]] # 문자열과 시제를 함께 저장할 테이블
+    # ____________________________
+    # | past(0행)   |  문장  |  ...
+    # | -------------------------
+    # | future(1행) |  문장  |  ...
+    # ----------------------------
     for i in range(len(string_table)):
         special_future = 0 # '것','이'를 처리하기 위한 변수
         for j in range(len(string_table[i])):
@@ -306,18 +311,21 @@ def find_tense(string_table):
             if is_have_tag('VCP', string_table[i][j]):
                 special_future = special_future + 1 # VCP 는 '이'이므로 ++함
             if special_future == 2: # '것'과 '이'가 모두 존재하면 미래 시제로 판단
-                tense_table.append(string_table[i])
-                tense_table.append('future')
+                tense_table[1].append(string_table[i])
                 break
-            if is_have_tag('EP', string_table[i][j]):
+            # 높임 표현(시, 십, 세, 심, 실)의 경우 처리
+            if is_have_tag('EP', string_table[i][j]) \
+                    and not is_have_char('시', string_table[i][j])\
+                    and not is_have_char('십', string_table[i][j])\
+                    and not is_have_char('세', string_table[i][j])\
+                    and not is_have_char('실', string_table[i][j])\
+                    and not is_have_char('심', string_table[i][j]):
                 # 미래시제 2: '겠'
                 if is_have_char('겠', string_table[i][j]):
-                    tense_table.append(string_table[i])
-                    tense_table.append('future')
+                    tense_table[1].append(string_table[i])
                 # 과거시제
                 else:
-                    tense_table.append(string_table[i])
-                    tense_table.append('past')
+                    tense_table[0].append(string_table[i])
                 # print(string_table[i][j])
                 break
 
