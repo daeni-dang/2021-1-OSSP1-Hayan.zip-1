@@ -227,7 +227,7 @@ def find_s(string_table):
         for k in range(len(string_table[i])):  #테이블에 저장된 한 문장 길이 동안
             if ((string_table[i][k][0] =='가'and string_table[i][k][1] =='JKS') or (string_table[i][k][0] =='이'and string_table[i][k][1] =='JKS')):
                 #가,이 중 주격 조사인 것들에 한해
-                for m in range(0, k-1): #주격 조사 앞에 있는 것들중
+                for m in range(0, k): #주격 조사 앞에 있는 것들중
                     if (string_table[i][m][1]=='NNG' or string_table[i][m][1]=='NNP'or string_table[i][m][1]=='NNB' or string_table[i][m][1]=='NP'):
                         #명사에 해당 되는 것들 중에
                         cnt=m    # 가장 주격 조사에 가까운 것을
@@ -241,7 +241,7 @@ def find_s(string_table):
                     if (string_table[i][x][1]=='JKS'): # jsk(주격 조사가 있으면)
                         jks_cnt +=1  #count변수++
                 if (jks_cnt<0): #만약 주격 조사가 없으면
-                    for z in range(0, k - 1):  # 은, 는 앞에 있는 것들중
+                    for z in range(0, k):  # 은, 는 앞에 있는 것들중
                         if (string_table[i][z][1] == 'NNG' or string_table[i][z][1] == 'NNP' or string_table[i][z][1] == 'NNB' or string_table[i][z][1] == 'NP'):
                                 # 명사에 해당 되는 것들 중에
                             jx_cnt = z  # 가장 주격 조사에 가까운 것을
