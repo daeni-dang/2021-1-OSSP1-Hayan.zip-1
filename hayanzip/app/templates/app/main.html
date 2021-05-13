@@ -106,7 +106,18 @@
                         data: {'final_str': final_str,  csrfmiddlewaretoken: '{{ csrf_token }}'},
                         type: "POST",
                         dataType: "json",
-                        success: function(response){}
+                        success: function(response){
+                        //응답이 들어온 경우
+                        for(var i=0; i<response.trueSentenceIndex.length; i++){
+                                //true문장은 초록색
+                                document.getElementById('script'+response.trueSentenceIndex[i]).className='green-text';
+                            }
+
+                            for(var i=0; i<response.falseSentenceIndex.length; i++){
+                                //fasle문장은 빨간색
+                                document.getElementById('script'+response.falseSentenceIndex[i]).className='red-text';
+                            }
+                        }
                     });
                 }
                 FINAL_STR_DOM.textContent = final_str;

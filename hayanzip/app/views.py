@@ -1,3 +1,6 @@
+import json
+
+from django.http import HttpResponse
 from django.shortcuts import render
 from eunjeon import Mecab
 import queue
@@ -39,6 +42,8 @@ def main(request):
                         one_sentence += q.get()
                     voice_table = sentence_division(one_sentence)
 
+                    trueSentenceIndex = [] #trueSentence의 index 저장할 공간
+                    falseSentenceIndex = [] #falseSentence의 index 저장할 공간
                     for k in range(0, len(voice_table)):
                         flag = 0
                         print(script_table[index])
@@ -47,10 +52,17 @@ def main(request):
                                 if script_table[index][j][0] == voice_table[k][j][0]:
                                     flag += 1
                         if flag == len(script_table[index]):
+                            trueSentenceIndex.append(index) #맞으면 trueSentence에 추가
                             print("같음")
                         else:
+                            falseSentenceIndex.append(index)    #틀리면 falseSentence에 추가
                             print("틀림")
                         index += 1
+                    data = {    #Json으로 넘길 data 생성
+                        'trueSentenceIndex': trueSentenceIndex,
+                        'falseSentenceIndex': falseSentenceIndex
+                    }
+                    return HttpResponse(json.dumps(data), content_type="application/json")
 
     return render(request, 'app/main.html')
 
