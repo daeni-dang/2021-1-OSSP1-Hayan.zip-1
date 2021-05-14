@@ -344,8 +344,7 @@ def find_adverb(input_string):
 
 # 보어를 찾는 함수 : 보격 조사를 찾고 보격 조사 앞에 있는 단어 + 보격 조사를 보어로 반환
 def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 판별 X)
-    mecab = Mecab()
-    temp_string = mecab.pos(input_string)
+    temp_string = input_string
     complementArr = []
     for i in range(len(temp_string)):
         if temp_string[i][1].find('JKC') != -1:  # 형태소 분석을 한 결과에서 보격 조사를 찾음
