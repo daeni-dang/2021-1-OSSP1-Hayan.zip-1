@@ -1,12 +1,16 @@
+body{
+    padding:0px;
+    margin:0px;
+}
 #wrapper{
     position: relative;
     margin: auto;
-    width: 1500px;
-    height: 1200px;
+    width: 100%;
+    height: 100vh;
 }
-
 #stt{
-    margin: 10px;
+    margin: 0px;
+    padding:10px;
 }
 
 #main{
@@ -17,14 +21,14 @@
 #left{
     margin: 10px;
     width: 50%;
-    height: 100%;
+    height: auto;
     display: block;
 }
 
 #right{
     margin: 10px;
     width: 50%;
-    height: 100%;
+    height: 70vh;
 }
 
 #inputStr{
@@ -41,7 +45,7 @@
 
 .text{
     width: 95%;
-    height: 1000px;
+    height: 100%;
     padding: 10px;
     font-family: "나눔스퀘어_ac ExtraBold";
     font-size: 30px;

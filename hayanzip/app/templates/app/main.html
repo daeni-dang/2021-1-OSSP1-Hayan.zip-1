@@ -14,24 +14,24 @@
                 <span id="finalStr"></span>
                 <span id="interim"></span>
             </div>
-            <div id="main">
-                <div id="left">
-                    <form id="input" method="post">
+            <form id="input" method="post">
+                <div id="main">
+                    <div id="left">
                         {% csrf_token %}
                         <textarea id="inputStr" name='inputStr' class="text" cols="43" row="100" placeholder="대본을 입력해주세요.">{{text}}</textarea>
                         <input class="btn" type="submit" value="분석하기">
-                    </form>
-                </div>
-                <div id="right">
-                    <div id="result">
-                        <div id="resultStr" class="text" cols="43" row="100">
-                        {% for i in script_string_array %}
-                            <span id="script{{forloop.counter0}}" class="white-text">{{i}}</span>
-                        {% endfor %}
-                        </div>
                     </div>
+                    <div id="right">
+                        <div id="resultStr" class="text" cols="43" row="100">
+                            {% for i in script_string_array %}
+                                <span id="script{{forloop.counter0}}" class="white-text">{{i}}</span>
+                            {% endfor %}
+                        </div>
+                        <input class="btn" type="button" value="원본 보기" onclick="show_result()">
+                    </div>
+
                 </div>
-            </div>
+            </form>
         </div>
         <script>
             const LANG = 'ko-KR';
@@ -124,7 +124,12 @@
                 INTERIM_DOM.textContent = interim;
 
             }
-
+            function show_result(){
+                white_sentences = document.querySelectorAll('.white-text');
+                for(var i of white_sentences){
+                    i.className='red-text';
+                }
+            }
             initRecognition();
         </script>
     </body>
