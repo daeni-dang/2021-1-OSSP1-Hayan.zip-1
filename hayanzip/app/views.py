@@ -151,30 +151,31 @@ def sentence_division(input_string):
 
     for i in range(len(string_table)):  # 테이블 출력
         print(string_table[i])
-    find_verb(string_table)
-    find_s(string_table)
-    find_o(string_table)
-    find_tense(string_table)
+    #find_verb(string_table)
+    #find_s(string_table)
+    #find_o(string_table)
+    #find_tense(string_table)
 
     # 문제! : 다은이 -> 다(MAG) + 은이(NNG) : MAG 삭제
     return string_table
 
-def find_verb(string_table):
-    for i in range(0, len(string_table)):
-        start_flag = -1  # 서술어의 시작 플래그 초기화
-        for j in range(0, len(string_table[i])):
-            if start_flag == -1 and is_have_tag('V', string_table[i][j]):  # 문장 요소에 V가 있다면
-                start_flag = j  # 시작 플래그는 현재 토큰 index
-            elif is_have_tag('NNG', string_table[i][j]):  # 문장 요소에 N이 있다면
-                start_flag = -1  # 서술어가 아니므로 start_flag = -1
-        if start_flag != -1:  # start_flag가 -1이면 서술어가 없다는 것
-            if start_flag > 0:  # start flag가 0이라면 앞에 것 볼 필요X
-                if is_have_tag('NNG', string_table[i][start_flag - 1]):  # start_flag 앞의 토큰이 명사라면
-                    start_flag -= 1  # 시작 플래그를 하나 줄인다.
-            print('V:', end=' ')
-            for k in range(start_flag, len(string_table[i])):  # start_flag부터 끝까지 서술어
-                print(string_table[i][k], end=' ')
-            print()
+def find_verb(input_string):
+    verb_table=[]
+    start_flag = -1  # 서술어의 시작 플래그 초기화
+    for j in range(0, len(input_string)):
+        if start_flag == -1 and is_have_tag('V', input_string[j]):  # 문장 요소에 V가 있다면
+            start_flag = j  # 시작 플래그는 현재 토큰 index
+        elif is_have_tag('NNG', input_string[j]):  # 문장 요소에 N이 있다면
+            start_flag = -1  # 서술어가 아니므로 start_flag = -1
+    if start_flag != -1:  # start_flag가 -1이면 서술어가 없다는 것
+        if start_flag > 0:  # start flag가 0이라면 앞에 것 볼 필요X
+            if is_have_tag('NNG', input_string[start_flag - 1]):  # start_flag 앞의 토큰이 명사라면
+                start_flag -= 1  # 시작 플래그를 하나 줄인다.
+        print('V:', end=' ')
+        for k in range(start_flag, len(input_string)):  # start_flag부터 끝까지 서술어
+            verb_table.append(input_string[k])
+        print(verb_table)
+    return verb_table
 
 
 # 보어를 찾는 함수 : 보격 조사를 찾고 보격 조사 앞에 있는 단어 + 보격 조사를 보어로 반환
