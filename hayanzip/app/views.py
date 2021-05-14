@@ -32,6 +32,8 @@ def main(request):
             index = 0
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
+            trueSentenceIndex = []  # trueSentence의 index 저장할 공간
+            falseSentenceIndex = []  # falseSentence의 index 저장할 공간
             mecab_result = mecab.pos(str)
             for i in range(len(mecab_result)):
                 q.put(mecab_result[i][0])
@@ -42,8 +44,6 @@ def main(request):
                         one_sentence += q.get()
                     voice_table = sentence_division(one_sentence)
 
-                    trueSentenceIndex = [] #trueSentence의 index 저장할 공간
-                    falseSentenceIndex = [] #falseSentence의 index 저장할 공간
                     for k in range(0, len(voice_table)):
                         flag = 0
                         print(script_table[index])
@@ -58,11 +58,11 @@ def main(request):
                             falseSentenceIndex.append(index)    #틀리면 falseSentence에 추가
                             print("틀림")
                         index += 1
-                    data = {    #Json으로 넘길 data 생성
-                        'trueSentenceIndex': trueSentenceIndex,
-                        'falseSentenceIndex': falseSentenceIndex
-                    }
-                    return HttpResponse(json.dumps(data), content_type="application/json")
+            data = {    #Json으로 넘길 data 생성
+                'trueSentenceIndex': trueSentenceIndex,
+                'falseSentenceIndex': falseSentenceIndex
+            }
+            return HttpResponse(json.dumps(data), content_type="application/json")
 
     return render(request, 'app/main.html')
 
