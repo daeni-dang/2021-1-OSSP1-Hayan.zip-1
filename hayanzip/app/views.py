@@ -22,7 +22,7 @@ script_index = 0
 q = queue.Queue()
 trueSentenceIndex = []
 falseSentenceIndex = []
-element_table = np.empty((0, 10), dtype=list)
+element_table = np.empty((0, 9), dtype=list)
 
 
 def main(request):
@@ -32,6 +32,7 @@ def main(request):
     global q
     global trueSentenceIndex  # trueSentence의 index 저장할 공간
     global falseSentenceIndex  # falseSentence의 index 저장할 공간
+    global element_table
 
     mecab = Mecab()
 
@@ -39,6 +40,7 @@ def main(request):
         str = request.POST.get('final_str', None)
         if str == None:  # 대본 입력됐을 경우
             text = request.POST['inputStr']
+            element_table = np.empty((0, 9), dtype=list)
             script_table = sentence_division(text) #형태소 포함된 배열
             script_string_array = sentence_without_part(text, script_table) #형태소 없는 배열
             script_index = 0
@@ -57,7 +59,7 @@ def main(request):
                     voice_table = sentence_division(one_sentence)
 
                     if script_index < len(script_table):  # list index out of range 처리
-                        if super_compare(script_table[script_index], voice_table[0]):
+                        if super_compare(script_index, voice_table[0], one_sentence):
                             trueSentenceIndex.append(script_index)
                         else:
                             falseSentenceIndex.append(script_index)
@@ -70,8 +72,10 @@ def main(request):
 
     return render(request, 'app/main.html')
 
-def super_compare(script_sentence, voice_sentence):
-    if simple_compare(script_sentence, voice_sentence):
+def super_compare(script_index, voice_sentence, one_sentence):
+    if simple_compare(script_table[script_index], voice_sentence):
+        return True
+    elif change_taxis_compare(element_table[script_index], voice_sentence, one_sentence):
         return True
     else:
         return False
@@ -79,10 +83,26 @@ def super_compare(script_sentence, voice_sentence):
 def simple_compare(script_sentence, voice_sentence):
     if len(script_sentence) != len(voice_sentence):
         return False
-
     for i in range(0,len(script_sentence)):
         if script_sentence[i][0] != voice_sentence[i][0]:
             return False
+    return True
+
+def change_taxis_compare(script_sentence_component, voice_sentence, origin_sentence):
+    voice_sentence_component = make_element_table(voice_sentence, origin_sentence)
+    print("voice_sentence_component")
+    print(voice_sentence_component)
+    print("script_sentence_component")
+    print(script_sentence_component)
+    for i in range(0, 7):
+        for j in range(0, len(script_sentence_component[i])):
+            print("script----------------")
+            print(script_sentence_component[i][j][0])
+            print("voice----------------")
+            print(script_sentence_component[i][j][0])
+            if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
+                return False
+
     return True
 
 def add_space_after_mot(input_string):  # '못' 뒤에 띄어쓰기 추가하는 함수 : '못'을 기준으로 split한 후, 각 요소 사이에 '못+공백'을 추가하여 합침.
@@ -191,21 +211,21 @@ def sentence_division(input_string):
 # 대본에 대해 문장별로 요소들을 정리하여 total_table에 담는 함수
 # | 주어 | 목적어 | 서술어 | 관형어 | 부사어 | 보어 | 아무것도 아닌거 | 시제 flag | 부정의 의미인지 아닌지 flag |
 # |  0  |   1   |   2   |   3   |   4   |  5  |      6       |    7     |            8             |
-def make_total_tb(mecab_sentence, origin_sentence):
+def make_element_table(mecab_sentence, origin_sentence):
 
-    global total_table
-    divide_temp = [[], [], [], [], [], [], [], [], [], []]
+    divide_line = [[], [], [], [], [], [], [], [], []]
 
-    divide_temp[0].extend(find_s(mecab_sentence))
-    divide_temp[1].extend(find_o(mecab_sentence))
-    divide_temp[2].extend(find_verb(mecab_sentence))
-    divide_temp[3].extend(find_tubular(origin_sentence, mecab_sentence))
-    divide_temp[4].extend(find_adverb(mecab_sentence))
-    divide_temp[5].extend(find_complement(mecab_sentence))
-    # divide_temp[6].extend()   # 문장 요소 검사에 아무것도 속하지 않는 경우
-    divide_temp[7].extend(tense_to_flag(mecab_sentence))
-    # divide_temp[8].extend()   # 부정 flag
-    total_table = np.append(total_table, np.array([divide_temp], dtype=list), axis=0)  # 행 추가
+    divide_line[0].extend(find_s(mecab_sentence))
+    divide_line[1].extend(find_o(mecab_sentence))
+    divide_line[2].extend(find_verb(mecab_sentence))
+    divide_line[3].extend(find_tubular(origin_sentence, mecab_sentence))
+    divide_line[4].extend(find_adverb(mecab_sentence))
+    divide_line[5].extend(find_complement(mecab_sentence))
+    # divide_line[6].extend()
+    divide_line[7].extend(tense_to_flag(mecab_sentence))
+    # divide_line[8].extend()
+
+    return divide_line
 
 # 주어 찾는 함수
 def find_s(sentence):
