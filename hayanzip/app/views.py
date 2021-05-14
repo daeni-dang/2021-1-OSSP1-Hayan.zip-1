@@ -96,7 +96,6 @@ def is_sentence_End(last_token):  # 문장의 마지막인지 판단 : EF[종결
     else:
         return False
 
-
 def is_MAG_except_neg(token):  # '못', '안'을 제외한 MAG[일반 부사]인가 판단
     if token[1] == 'MAG':
         if token[0] != '못' and token[0] != '안':
@@ -109,6 +108,19 @@ def is_mark(token):  # 문장부호(. ? ! , · / : )인지 판단
         return True
     return False
 
+# 찾고자 하는 문자('했' 같은 것)가 있는지 판단하는 함수
+def is_have_char(what_find, token):
+    if token[0].find(what_find) != -1:
+        return True
+    else:
+        return False
+
+# 찾고자 하는 태그('EF' 같은 것)가 있는지 판단하는 함수
+def is_have_tag(what_find, token):
+    if token[1].find(what_find) != -1:
+        return True
+    else:
+        return False
 
 def sentence_without_part(input_string, string_table):
     #형태소 구분 없이 문자열로만 string 문장 구분
@@ -141,8 +153,8 @@ def sentence_division(input_string):
         if is_sentence_End(mecab_result[i]):  # 문장의 마지막인지 판단
             sentence = []
             for j in range(string_start, i + 1):  # 한 문장 내의 첫번째 요소부터 마지막 요소까지 저장.
-                if is_MAG_except_neg(mecab_result[j]):  # '못', '안'을 제외한 MAG[일반 부사]는 저장 X
-                    continue
+                # if is_MAG_except_neg(mecab_result[j]):  # '못', '안'을 제외한 MAG[일반 부사]는 저장 X
+                #     continue
                 if is_mark(mecab_result[j]):  # 문장부호는 저장 X
                     continue
                 sentence.append(mecab_result[j])  # 각 요소를 현재 문장에 추가
@@ -158,90 +170,6 @@ def sentence_division(input_string):
 
     # 문제! : 다은이 -> 다(MAG) + 은이(NNG) : MAG 삭제
     return string_table
-
-def find_verb(input_string):
-    verb_table=[]
-    start_flag = -1  # 서술어의 시작 플래그 초기화
-    for j in range(0, len(input_string)):
-        if start_flag == -1 and is_have_tag('V', input_string[j]):  # 문장 요소에 V가 있다면
-            start_flag = j  # 시작 플래그는 현재 토큰 index
-        elif is_have_tag('NNG', input_string[j]):  # 문장 요소에 N이 있다면
-            start_flag = -1  # 서술어가 아니므로 start_flag = -1
-    if start_flag != -1:  # start_flag가 -1이면 서술어가 없다는 것
-        if start_flag > 0:  # start flag가 0이라면 앞에 것 볼 필요X
-            if is_have_tag('NNG', input_string[start_flag - 1]):  # start_flag 앞의 토큰이 명사라면
-                start_flag -= 1  # 시작 플래그를 하나 줄인다.
-        print('V:', end=' ')
-        for k in range(start_flag, len(input_string)):  # start_flag부터 끝까지 서술어
-            verb_table.append(input_string[k])
-        print(verb_table)
-    return verb_table
-
-
-# 보어를 찾는 함수 : 보격 조사를 찾고 보격 조사 앞에 있는 단어 + 보격 조사를 보어로 반환
-def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 판별 X)
-    mecab = Mecab()
-    temp_string = mecab.pos(input_string)
-    complementArr = []
-    for i in range(len(temp_string)):
-        if temp_string[i][1].find('JKC') != -1:  # 형태소 분석을 한 결과에서 보격 조사를 찾음
-            complementArr.append(temp_string[i - 1])
-            complementArr.append(temp_string[i])  # 보격 조사와 그 앞의 단어가 보어이므로 두 개 모두 list에 넣어줌
-    return complementArr  # 한 문장 안에 보어가 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
-
-
-# 관형어를 찾는 함수 : 관형격 조사를 통해 관형어를 찾는 경우, 관형사를 관형어로 찾는 경우, 관형형 전성어미를 통해 관형어를 찾는 경우로 구성
-def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 친구를 만났다)와 체언의 자격을 가진 말 + 관형격 조사의 경우(ex.그는 웃기기의 천재다) 아직 처리 X)
-    mecab = Mecab()
-    temp_string = mecab.pos(input_string)
-    tubularArr = []
-
-    for i in range(len(temp_string)):
-        if temp_string[i][1].find('JKG') != -1:  # 관형격 조사를 통해 관형어를 찾음. 관형격 조사와 그 앞의 단어는 관형어이므로 이를 list에 추가
-            tubularArr.append(temp_string[i - 1])
-            tubularArr.append(temp_string[i])
-
-        if temp_string[i][1].find('MM') != -1:  # 관형사를 관형어로 판단. 관형사를 list에 추가
-            tubularArr.append(temp_string[i])
-
-        if temp_string[i][1].find('ETM') != -1:  # 관형형 전성어미를 통해 관형어를 찾음
-            if temp_string[i][1].find('+') != -1:  # 관형형 전성어미가 다른 형태소에 포함되어 나오는 경우(ex.('못생긴', 'VA+ETM'))
-                inputIndex = input_string.find(temp_string[i][0])
-                if temp_string[i - 1] == temp_string[
-                    len(temp_string) - 1]:  # 여러 개의 관형형 전성어미가 나올 경우 띄어쓰기로 각각을 구분하기 때문에 맨 앞의 관형형 전성어미에 대한 예외처리
-                    tubularArr.append(temp_string[i])
-                elif input_string[inputIndex - 1] != ' ':  # 관형형 전성어미가 다른 형태소와 합성되어 있으며 그 앞에 다른 형태소가 나오는 경우 관형형 전성어미의 앞의 단어도 list에 추가(ex.('깨끗', 'XR'), ('한', 'XSA+ETM'))
-                    tubularArr.append(temp_string[i - 1])
-                    tubularArr.append(temp_string[i])
-                else:  # 관형형 전성어미가 붙어서 한번에 나오는 경우 그 단어만 관형어 list에 추가(ex.('아름다운', 'VA+ETM'))
-                    tubularArr.append(temp_string[i])
-            else:  # 관형형 전성어미가 다른 형태소에 포함되지 않고 나오는 경우(ex.('작', 'VA'), ('은', 'ETM'))
-                tubularArr.append(temp_string[i - 1])
-                tubularArr.append(temp_string[i])
-
-        # 체언의 자격을 가진 말 + 관형격 조사의 경우(ex.그는 웃기기의 천재다)에 대한 코드(아직 수정-ing)
-        # if temp_string[i][1].find('JKG') != -1:
-        #     jkgWord = temp_string[i][0]
-        #     inputIndex = input_string.find(jkgWord)
-        #     tubularTemp = ""
-        #     for j in reversed(range(inputIndex)):
-        #         if input_string[j] != ' ':
-        #             tubularTemp = tubularTemp + input_string[j]
-        #         elif input_string[j] == ' ':
-        #             break
-        #         elif j == 0:
-        #             break
-        #     tt = tubularTemp[::-1]
-        #     print(tt)
-        #     for k in range(len(temp_string)):
-        #         if temp_string[k][0].find(tt[0]) != -1:
-        #             while True:
-        #                 print(temp_string[k])
-        #                 if temp_string[k][1] == 'JKG':
-        #                     break
-        #                 k += 1
-
-    return tubularArr  # 한 문장 안에 관형어는 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
 
 # 주어 찾는 함수
 def find_s(sentence):
@@ -319,56 +247,151 @@ def find_o(sentence):
 
     return o_table
 
-# 찾고자 하는 문자('했' 같은 것)가 있는지 판단하는 함수
-def is_have_char(what_find, token):
-    if token[0].find(what_find) != -1:
-        return True
-    else:
-        return False
+# 서술어를 찾는 함수
+def find_verb(input_string):
+    verb_table=[]
+    start_flag = -1  # 서술어의 시작 플래그 초기화
+    for j in range(0, len(input_string)):
+        if start_flag == -1 and is_have_tag('V', input_string[j]):  # 문장 요소에 V가 있다면
+            start_flag = j  # 시작 플래그는 현재 토큰 index
+        elif is_have_tag('NNG', input_string[j]):  # 문장 요소에 N이 있다면
+            start_flag = -1  # 서술어가 아니므로 start_flag = -1
+    if start_flag != -1:  # start_flag가 -1이면 서술어가 없다는 것
+        if start_flag > 0:  # start flag가 0이라면 앞에 것 볼 필요X
+            if is_have_tag('NNG', input_string[start_flag - 1]):  # start_flag 앞의 토큰이 명사라면
+                start_flag -= 1  # 시작 플래그를 하나 줄인다.
+        print('V:', end=' ')
+        for k in range(start_flag, len(input_string)):  # start_flag부터 끝까지 서술어
+            verb_table.append(input_string[k])
+        print(verb_table)
+    return verb_table
 
-# 찾고자 하는 태그('EF' 같은 것)가 있는지 판단하는 함수
-def is_have_tag(what_find, token):
-    if token[1].find(what_find) != -1:
-        return True
-    else:
-        return False
+# 관형어를 찾는 함수 : 관형격 조사를 통해 관형어를 찾는 경우, 관형사를 관형어로 찾는 경우, 관형형 전성어미를 통해 관형어를 찾는 경우로 구성
+def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 친구를 만났다)와 체언의 자격을 가진 말 + 관형격 조사의 경우(ex.그는 웃기기의 천재다) 아직 처리 X)
+    mecab = Mecab()
+    temp_string = mecab.pos(input_string)
+    tubularArr = []
+
+    for i in range(len(temp_string)):
+        if temp_string[i][1].find('JKG') != -1:  # 관형격 조사를 통해 관형어를 찾음. 관형격 조사와 그 앞의 단어는 관형어이므로 이를 list에 추가
+            tubularArr.append(temp_string[i - 1])
+            tubularArr.append(temp_string[i])
+
+        if temp_string[i][1].find('MM') != -1:  # 관형사를 관형어로 판단. 관형사를 list에 추가
+            tubularArr.append(temp_string[i])
+
+        if temp_string[i][1].find('ETM') != -1:  # 관형형 전성어미를 통해 관형어를 찾음
+            if temp_string[i][1].find('+') != -1:  # 관형형 전성어미가 다른 형태소에 포함되어 나오는 경우(ex.('못생긴', 'VA+ETM'))
+                inputIndex = input_string.find(temp_string[i][0])
+                if temp_string[i - 1] == temp_string[
+                    len(temp_string) - 1]:  # 여러 개의 관형형 전성어미가 나올 경우 띄어쓰기로 각각을 구분하기 때문에 맨 앞의 관형형 전성어미에 대한 예외처리
+                    tubularArr.append(temp_string[i])
+                elif input_string[inputIndex - 1] != ' ':  # 관형형 전성어미가 다른 형태소와 합성되어 있으며 그 앞에 다른 형태소가 나오는 경우 관형형 전성어미의 앞의 단어도 list에 추가(ex.('깨끗', 'XR'), ('한', 'XSA+ETM'))
+                    tubularArr.append(temp_string[i - 1])
+                    tubularArr.append(temp_string[i])
+                else:  # 관형형 전성어미가 붙어서 한번에 나오는 경우 그 단어만 관형어 list에 추가(ex.('아름다운', 'VA+ETM'))
+                    tubularArr.append(temp_string[i])
+            else:  # 관형형 전성어미가 다른 형태소에 포함되지 않고 나오는 경우(ex.('작', 'VA'), ('은', 'ETM'))
+                tubularArr.append(temp_string[i - 1])
+                tubularArr.append(temp_string[i])
+
+        # 체언의 자격을 가진 말 + 관형격 조사의 경우(ex.그는 웃기기의 천재다)에 대한 코드(아직 수정-ing)
+        # if temp_string[i][1].find('JKG') != -1:
+        #     jkgWord = temp_string[i][0]
+        #     inputIndex = input_string.find(jkgWord)
+        #     tubularTemp = ""
+        #     for j in reversed(range(inputIndex)):
+        #         if input_string[j] != ' ':
+        #             tubularTemp = tubularTemp + input_string[j]
+        #         elif input_string[j] == ' ':
+        #             break
+        #         elif j == 0:
+        #             break
+        #     tt = tubularTemp[::-1]
+        #     print(tt)
+        #     for k in range(len(temp_string)):
+        #         if temp_string[k][0].find(tt[0]) != -1:
+        #             while True:
+        #                 print(temp_string[k])
+        #                 if temp_string[k][1] == 'JKG':
+        #                     break
+        #                 k += 1
+
+    return tubularArr  # 한 문장 안에 관형어는 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
+
+# 부사어를 찾는 함수
+
+# 부정어
+
+# 보어를 찾는 함수 : 보격 조사를 찾고 보격 조사 앞에 있는 단어 + 보격 조사를 보어로 반환
+def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 판별 X)
+    mecab = Mecab()
+    temp_string = mecab.pos(input_string)
+    complementArr = []
+    for i in range(len(temp_string)):
+        if temp_string[i][1].find('JKC') != -1:  # 형태소 분석을 한 결과에서 보격 조사를 찾음
+            complementArr.append(temp_string[i - 1])
+            complementArr.append(temp_string[i])  # 보격 조사와 그 앞의 단어가 보어이므로 두 개 모두 list에 넣어줌
+    return complementArr  # 한 문장 안에 보어가 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
 
 # 시제 찾는 함수
-def find_tense(string_table):
-    tense_table = [['past', ], ['future', ]] # 문자열과 시제를 함께 저장할 테이블
+def find_tense(sentence):
+    tense_table = [['past', ], ['present', ], ['future', ]] # 문자열과 시제를 함께 저장할 테이블
     # ____________________________
     # | past(0행)   |  문장  |  ...
-    # | -------------------------
-    # | future(1행) |  문장  |  ...
-    # ----------------------------
-    for i in range(len(string_table)):
-        special_future = 0 # '것','이'를 처리하기 위한 변수
-        for j in range(len(string_table[i])):
-            # 미래시제 1: '것''이'
-            if is_have_tag('NNB', string_table[i][j]):
-                special_future = special_future + 1 # NNB 는 '것'이므로 ++함
-            if is_have_tag('VCP', string_table[i][j]):
-                special_future = special_future + 1 # VCP 는 '이'이므로 ++함
-            if special_future == 2: # '것'과 '이'가 모두 존재하면 미래 시제로 판단
-                tense_table[1].append(string_table[i])
-                break
-            # 높임 표현(시, 십, 세, 심, 실)의 경우 처리
-            if is_have_tag('EP', string_table[i][j]) \
-                    and not is_have_char('시', string_table[i][j])\
-                    and not is_have_char('십', string_table[i][j])\
-                    and not is_have_char('세', string_table[i][j])\
-                    and not is_have_char('실', string_table[i][j])\
-                    and not is_have_char('심', string_table[i][j]):
-                # 미래시제 2: '겠'
-                if is_have_char('겠', string_table[i][j]):
-                    tense_table[1].append(string_table[i])
-                # 과거시제
-                else:
-                    tense_table[0].append(string_table[i])
-                # print(string_table[i][j])
-                break
-
+    # | __________________________
+    # | present(1행)|  문장  |  ...
+    # | __________________________
+    # | future(2행) |  문장  |  ...
+    # | __________________________
+    for i in range(len(sentence)):
+        special_future = 0  # '것','이'를 처리하기 위한 변수
+        # 미래시제 1: '것''이'
+        if sentence[i][1].find('NNB') != -1:
+            special_future = special_future + 1  # NNB 는 '것'이므로 ++함
+        if sentence[i][1].find('VCP') != -1:
+            special_future = special_future + 1  # VCP 는 '이'이므로 ++함
+        if special_future == 2:  # '것'과 '이'가 모두 존재하면 미래 시제로 판단
+            tense_table[2].append(sentence[i])
+            break
+        # 높임 표현(시, 십, 세, 심, 실)의 경우 처리
+        if sentence[i][1].find('EP') != -1 \
+                and not sentence[i][0].find('시') != -1 \
+                and not sentence[i][0].find('십') != -1 \
+                and not sentence[i][0].find('세') != -1 \
+                and not sentence[i][0].find('실') != -1 \
+                and not sentence[i][0].find('심') != -1:
+            # 미래시제 2: '겠'
+            if sentence[i][0].find('겠') != -1:
+                tense_table[2].append(sentence[i])
+            # 과거시제
+            else:
+                tense_table[0].append(sentence[i])
+            # print(sentence[i][j])
+            break
+        # 현재시제
+        else:
+            tense_table[1].append(sentence[i])
+    # print(type(tense_table[0][0]))
     return tense_table
     # 추가 사항
     # '먹을 것이다'와 '먹는 것이다'를 구별할 수가 없음.
     # -> 파이썬 jamo 패키지 사용하면 초중종성 분리해서 'ㄹ' 찾아서 미래 처리 가능
+
+# 시제를 플래그로 변환하는 함수
+def tense_to_flag(sentence):
+    # past    : 0
+    # present : 1
+    # future  : 2
+    tense_table = find_tense(sentence)
+    tense_flag = []
+    for i in range(len(tense_table)):
+        # 길이가 2 이상이어야 문장이 있는 것임
+        if len(tense_table[i]) > 1:
+            if tense_table[i][0] == 'past':
+                tense_flag.append(0)
+            elif tense_table[i][0] == 'future':
+                tense_flag.append(2)
+            else:
+                tense_flag.append(1)
+    return tense_flag
