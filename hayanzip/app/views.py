@@ -8,18 +8,24 @@ import queue
 # Create your views here.
 global script_table
 global voice_table
-global index
+global script_index
 global q
+global trueSentenceIndex
+global falseSentenceIndex
 script_table = []
 voice_table = []
-index = 0
+script_index = 0
 q = queue.Queue()
+trueSentenceIndex = []
+falseSentenceIndex = []
 
 def main(request):
     global script_table
     global voice_table
-    global index
+    global script_index
     global q
+    global trueSentenceIndex  # trueSentence의 index 저장할 공간
+    global falseSentenceIndex  # falseSentence의 index 저장할 공간
 
     mecab = Mecab()
 
@@ -29,11 +35,9 @@ def main(request):
             text = request.POST['inputStr']
             script_table = sentence_division(text) #형태소 포함된 배열
             script_string_array = sentence_without_part(text, script_table) #형태소 없는 배열
-            index = 0
+            script_index = 0
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
-            trueSentenceIndex = []  # trueSentence의 index 저장할 공간
-            falseSentenceIndex = []  # falseSentence의 index 저장할 공간
             mecab_result = mecab.pos(str)
             for i in range(len(mecab_result)):
                 q.put(mecab_result[i][0])
@@ -44,20 +48,21 @@ def main(request):
                         one_sentence += q.get()
                     voice_table = sentence_division(one_sentence)
 
-                    for k in range(0, len(voice_table)):
-                        flag = 0
-                        print(script_table[index])
-                        for j in range(0, len(script_table[index])):
-                            if j < len(voice_table[k]):
-                                if script_table[index][j][0] == voice_table[k][j][0]:
-                                    flag += 1
-                        if flag == len(script_table[index]):
-                            trueSentenceIndex.append(index) #맞으면 trueSentence에 추가
-                            print("같음")
-                        else:
-                            falseSentenceIndex.append(index)    #틀리면 falseSentence에 추가
-                            print("틀림")
-                        index += 1
+                    if script_index < len(script_table):  # list index out of range 처리
+                        for k in range(0, len(voice_table)):
+                            flag = 0
+                            print(script_table[script_index])
+                            for j in range(0, len(script_table[script_index])):
+                                if j < len(voice_table[k]):
+                                    if script_table[script_index][j][0] == voice_table[k][j][0]:
+                                        flag += 1
+                            if flag == len(script_table[script_index]):
+                                trueSentenceIndex.append(script_index) #맞으면 trueSentence에 추가
+                                print("같음")
+                            else:
+                                falseSentenceIndex.append(script_index)    #틀리면 falseSentence에 추가
+                                print("틀림")
+                            script_index += 1
             data = {    #Json으로 넘길 data 생성
                 'trueSentenceIndex': trueSentenceIndex,
                 'falseSentenceIndex': falseSentenceIndex
