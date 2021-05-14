@@ -368,15 +368,18 @@ def find_tense(sentence):
     # | __________________________
     # | future(2행) |  문장  |  ...
     # | __________________________
+
+    special_future = 0  # '것','이'를 처리하기 위한 변수
+    is_present_flag = True # 현재시제 판단 위한 변수
     for i in range(len(sentence)):
-        special_future = 0  # '것','이'를 처리하기 위한 변수
         # 미래시제 1: '것''이'
         if sentence[i][1].find('NNB') != -1:
             special_future = special_future + 1  # NNB 는 '것'이므로 ++함
         if sentence[i][1].find('VCP') != -1:
             special_future = special_future + 1  # VCP 는 '이'이므로 ++함
         if special_future == 2:  # '것'과 '이'가 모두 존재하면 미래 시제로 판단
-            tense_table[2].append(sentence[i])
+            tense_table[2].append(sentence)
+            is_present_flag = False
             break
         # 높임 표현(시, 십, 세, 심, 실)의 경우 처리
         if sentence[i][1].find('EP') != -1 \
@@ -387,16 +390,16 @@ def find_tense(sentence):
                 and not sentence[i][0].find('심') != -1:
             # 미래시제 2: '겠'
             if sentence[i][0].find('겠') != -1:
-                tense_table[2].append(sentence[i])
+                tense_table[2].append(sentence)
+                is_present_flag = False
             # 과거시제
             else:
-                tense_table[0].append(sentence[i])
-            # print(sentence[i][j])
+                tense_table[0].append(sentence)
+                is_present_flag = False
             break
-        # 현재시제
-        else:
-            tense_table[1].append(sentence[i])
-    # print(type(tense_table[0][0]))
+    # 현재시제
+    if is_present_flag == True:
+        tense_table[1].append(sentence)
     return tense_table
     # 추가 사항
     # '먹을 것이다'와 '먹는 것이다'를 구별할 수가 없음.
