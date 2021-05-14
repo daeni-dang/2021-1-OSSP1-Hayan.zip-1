@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from eunjeon import Mecab
 import queue
+import numpy as np
 
 # Create your views here.
 global script_table
@@ -12,12 +13,16 @@ global script_index
 global q
 global trueSentenceIndex
 global falseSentenceIndex
+
 script_table = []
 voice_table = []
 script_index = 0
 q = queue.Queue()
 trueSentenceIndex = []
 falseSentenceIndex = []
+total_table = np.empty((0, 10), dtype=list)
+total_table_id = 0
+
 
 def main(request):
     global script_table
