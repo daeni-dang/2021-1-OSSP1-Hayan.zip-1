@@ -36,6 +36,8 @@ def main(request):
             script_table = sentence_division(text) #형태소 포함된 배열
             script_string_array = sentence_without_part(text, script_table) #형태소 없는 배열
             script_index = 0
+            trueSentenceIndex = []
+            falseSentenceIndex = []
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
             mecab_result = mecab.pos(str)
@@ -49,20 +51,11 @@ def main(request):
                     voice_table = sentence_division(one_sentence)
 
                     if script_index < len(script_table):  # list index out of range 처리
-                        for k in range(0, len(voice_table)):
-                            flag = 0
-                            print(script_table[script_index])
-                            for j in range(0, len(script_table[script_index])):
-                                if j < len(voice_table[k]):
-                                    if script_table[script_index][j][0] == voice_table[k][j][0]:
-                                        flag += 1
-                            if flag == len(script_table[script_index]):
-                                trueSentenceIndex.append(script_index) #맞으면 trueSentence에 추가
-                                print("같음")
-                            else:
-                                falseSentenceIndex.append(script_index)    #틀리면 falseSentence에 추가
-                                print("틀림")
-                            script_index += 1
+                        if super_compare(script_table[script_index], voice_table[0]):
+                            trueSentenceIndex.append(script_index)
+                        else:
+                            falseSentenceIndex.append(script_index)
+                        script_index += 1
             data = {    #Json으로 넘길 data 생성
                 'trueSentenceIndex': trueSentenceIndex,
                 'falseSentenceIndex': falseSentenceIndex
@@ -71,6 +64,20 @@ def main(request):
 
     return render(request, 'app/main.html')
 
+def super_compare(script_sentence, voice_sentence):
+    if simple_compare(script_sentence, voice_sentence):
+        return True
+    else:
+        return False
+
+def simple_compare(script_sentence, voice_sentence):
+    if len(script_sentence) != len(voice_sentence):
+        return False
+
+    for i in range(0,len(script_sentence)):
+        if script_sentence[i][0] != voice_sentence[i][0]:
+            return False
+    return True
 
 def add_space_after_mot(input_string):  # '못' 뒤에 띄어쓰기 추가하는 함수 : '못'을 기준으로 split한 후, 각 요소 사이에 '못+공백'을 추가하여 합침.
     split_neg = input_string.split('못')
