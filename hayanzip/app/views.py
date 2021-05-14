@@ -233,37 +233,40 @@ def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 
 # 주어 찾는 함수
 def find_s(string_table):
     s_table=[] #주어들만 저장할 테이블
-    cnt=0
-    jx_cnt=0
     for i in range(len(string_table)): #테이블 전체에서
         for k in range(len(string_table[i])):  #테이블에 저장된 한 문장 길이 동안
             if ((string_table[i][k][0] =='가'and string_table[i][k][1] =='JKS') or (string_table[i][k][0] =='이'and string_table[i][k][1] =='JKS')):
                 #가,이 중 주격 조사인 것들에 한해
+                cnt = 0
                 for m in range(0, k): #주격 조사 앞에 있는 것들중
                     if (string_table[i][m][1]=='NNG' or string_table[i][m][1]=='NNP'or string_table[i][m][1]=='NNB' or string_table[i][m][1]=='NP'):
                         #명사에 해당 되는 것들 중에
                         cnt=m    # 가장 주격 조사에 가까운 것을
                 s_table.append(string_table[i][cnt])  #주어라고 저장
-               # s_table.append(string_table[i][k])   #주어 뒤에 조사(확인용)
+                s_table.append(string_table[i][k])   #주어 뒤에 조사(확인용)
 
             if ((string_table[i][k][0] =='은'and string_table[i][k][1] =='JX') or (string_table[i][k][0] =='는'and string_table[i][k][1] =='JX')):
                 #은, 는 중 보조사 인것들에 한해
                 jks_cnt = -1 # 주격조사count변수
+                jx_cnt = -1
                 for x in range(len(string_table[i])):# 테이블의 i번째 문장 길이동안
                     if (string_table[i][x][1]=='JKS'): # jsk(주격 조사가 있으면)
                         jks_cnt +=1  #count변수++
-                if (jks_cnt<0): #만약 주격 조사가 없으면
+                for jx in range(0, k):
+                    if ((string_table[i][jx][0] =='은'and string_table[i][jx][1] =='JX') or (string_table[i][jx][0] =='는'and string_table[i][jx][1] =='JX')):
+                        jx_cnt +=1
+                if (jks_cnt<0 and jx_cnt<0): #만약 주격 조사가 없으면
                     for z in range(0, k):  # 은, 는 앞에 있는 것들중
+                        N_cnt = 0
                         if (string_table[i][z][1] == 'NNG' or string_table[i][z][1] == 'NNP' or string_table[i][z][1] == 'NNB' or string_table[i][z][1] == 'NP'):
                                 # 명사에 해당 되는 것들 중에
-                            jx_cnt = z  # 가장 주격 조사에 가까운 것을
-                    s_table.append(string_table[i][jx_cnt])# 주어라고 저장
-                   # s_table.append(string_table[i][k])   #주어 뒤에 조사(확인용)
+                            N_cnt = z  # 가장 주격 조사에 가까운 것을
+
+                    s_table.append(string_table[i][N_cnt])# 주어라고 저장
+                    s_table.append(string_table[i][k])   #주어 뒤에 조사(확인용)
     print("주어:")
     for j in range(len(s_table)):
         print(s_table[j])
-
-    return s_table
 
 #목적어 찾는 함수
 def find_o(string_table):
@@ -274,23 +277,32 @@ def find_o(string_table):
             if ((string_table[i][k][0] =='을' and string_table[i][k][1] =='JKO') or (string_table[i][k][0] =='를'and string_table[i][k][1] =='JKO')):
                 #을를 인데 목적격 조사인 것이 나오면
                 o_table.append(string_table[i][k-1])# 목적어 라고 저장
-                #o_table.append(string_table[i][k])# 목적어 뒤에 조사(확인용)
+                o_table.append(string_table[i][k])# 목적어 뒤에 조사(확인용)
 
             if ((string_table[i][k][0] =='은'and string_table[i][k][1] =='JX') or (string_table[i][k][0] =='는'and string_table[i][k][1] =='JX')):
                 #은 는 인데 보조사 인 경우
                 jks_cnt = -1 # 주격조사를 count
+                jx_cnt =-1
                 for x in range(len(string_table[i])):  # 테이블의 i번째 문장 길이동안
                     if (string_table[i][x][1] == 'JKS'):  # jsk(주격 조사가 있으면)
                         jks_cnt += 1  # count변수++
-                if (jks_cnt>=0): #주격 조사가 있으면
-                    o_table.append(string_table[i][k - 1]) #조사 앞을 목적어라고 저장
-                    #o_table.append(string_table[i][k]) #목적어 뒤에 조사(확인용)
+                for jx in range(0, k):
+                    if ((string_table[i][jx][0] == '은' and string_table[i][jx][1] == 'JX') or (
+                            string_table[i][jx][0] == '는' and string_table[i][jx][1] == 'JX')):
+                        jx_cnt += 1
+                if (jks_cnt>=0 or jx_cnt>=0): #주격 조사가 있으면
+                    for z in range(0, k):  # 은, 는 앞에 있는 것들중
+                        N_cnt =0
+                        if (string_table[i][z][1] == 'NNG' or string_table[i][z][1] == 'NNP' or string_table[i][z][1] == 'NNB' or string_table[i][z][1] == 'NP'):
+                                # 명사에 해당 되는 것들 중에
+                            N_cnt = z  # 가장 주격 조사에 가까운 것을
+
+                    o_table.append(string_table[i][N_cnt])#조사 앞을 목적어라고 저장
+                    o_table.append(string_table[i][k]) #목적어 뒤에 조사(확인용)
 
     print("목적어:")
     for j in range(len(o_table)):
         print(o_table[j])
-
-    return o_table
 
 # 찾고자 하는 문자('했' 같은 것)가 있는지 판단하는 함수
 def is_have_char(what_find, token):
