@@ -21,7 +21,6 @@ q = queue.Queue()
 trueSentenceIndex = []
 falseSentenceIndex = []
 total_table = np.empty((0, 10), dtype=list)
-total_table_id = 0
 
 
 def main(request):
@@ -169,6 +168,7 @@ def sentence_division(input_string):
             make_total_tb(sentence, origin_string_table[cnt])   # 한 문장에 대해 문장 요소들을 모두 저장해주고 그 문장들을 모은 테이블을 만듦
             cnt += 1
             string_start = i + 1  # 다음 문장의 첫 번째 요소를 가리킴.
+    return string_table
 
     # total_table에 잘 들어갔는지 확인하기 위해 출력하는 코드
     # for i in range(len(total_table)):
@@ -181,25 +181,23 @@ def sentence_division(input_string):
 
 
 # 대본에 대해 문장별로 요소들을 정리하여 total_table에 담는 함수
-# | index | 주어 | 목적어 | 서술어 | 관형어 | 부사어 | 보어 | 부정의 의미인지 아닌지 flag | 시제 flag | 아무것도 아닌거 |
-# |   0   |  1  |   2   |   3   |   4   |   5   |  6  |            7            |    8     |       9      |
+# | 주어 | 목적어 | 서술어 | 관형어 | 부사어 | 보어 | 부정의 의미인지 아닌지 flag | 시제 flag | 아무것도 아닌거 |
+# |  0  |   1   |   2   |   3   |   4   |  5  |            6            |    7     |       8      |
 def make_total_tb(mecab_sentence, origin_sentence):
 
     global total_table
-    global total_table_id
-    divide_temp = [total_table_id, [], [], [], [], [], [], [], [], []]
+    divide_temp = [[], [], [], [], [], [], [], [], [], []]
 
-    divide_temp[1].extend(find_s(mecab_sentence))
-    divide_temp[2].extend(find_o(mecab_sentence))
-    divide_temp[3].extend(find_verb(mecab_sentence))
-    divide_temp[4].extend(find_tubular(origin_sentence, mecab_sentence))
-    divide_temp[5].extend(find_adverb(mecab_sentence))
-    divide_temp[6].extend(find_complement(mecab_sentence))
-    # divide_temp[7].extend()   # 부정 flag
-    divide_temp[8].extend(tense_to_flag(mecab_sentence))
-    # divide_temp[9].extend()   # 문장 요소 검사에 아무것도 속하지 않는 경우
+    divide_temp[0].extend(find_s(mecab_sentence))
+    divide_temp[1].extend(find_o(mecab_sentence))
+    divide_temp[2].extend(find_verb(mecab_sentence))
+    divide_temp[3].extend(find_tubular(origin_sentence, mecab_sentence))
+    divide_temp[4].extend(find_adverb(mecab_sentence))
+    divide_temp[5].extend(find_complement(mecab_sentence))
+    # divide_temp[6].extend()   # 부정 flag
+    divide_temp[7].extend(tense_to_flag(mecab_sentence))
+    # divide_temp[8].extend()   # 문장 요소 검사에 아무것도 속하지 않는 경우
     total_table = np.append(total_table, np.array([divide_temp], dtype=list), axis=0)  # 행 추가
-    total_table_id += 1
 
 # 주어 찾는 함수
 def find_s(sentence):
