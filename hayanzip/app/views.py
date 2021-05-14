@@ -325,8 +325,24 @@ def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 
     return tubularArr  # 한 문장 안에 관형어는 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
 
 # 부사어를 찾는 함수
+def find_adverb(input_string):
+    temp_string = input_string
+    adverbArr = []
 
-# 부정어
+    for i in range(len(temp_string)):
+        if temp_string[i][1].find('MAG') != -1:
+            adverbArr.append(temp_string[i])
+
+        if temp_string[i][1].find('MAJ') != -1:
+            adverbArr.append(temp_string[i])
+
+        if temp_string[i][1].find('JKB') != -1:
+            adverbArr.append(temp_string[i - 1])
+            adverbArr.append(temp_string[i])
+
+    return adverbArr
+
+# 부정표현 flag
 
 # 보어를 찾는 함수 : 보격 조사를 찾고 보격 조사 앞에 있는 단어 + 보격 조사를 보어로 반환
 def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 판별 X)
