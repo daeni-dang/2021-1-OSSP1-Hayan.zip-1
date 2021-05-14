@@ -230,9 +230,6 @@ def find_s(sentence):
 
                     s_table.append(sentence[N_cnt])# 주어라고 저장
                     s_table.append(sentence[k])   #주어 뒤에 조사(확인용)
-    print("주어:")
-    for j in range(len(s_table)):
-        print(s_table[j])
 
     return s_table
 
@@ -267,10 +264,6 @@ def find_o(sentence):
                     o_table.append(sentence[N_cnt])#조사 앞을 목적어라고 저장
                     o_table.append(sentence[k]) #목적어 뒤에 조사(확인용)
 
-    print("목적어:")
-    for j in range(len(o_table)):
-        print(o_table[j])
-
     return o_table
 
 # 서술어를 찾는 함수
@@ -286,16 +279,14 @@ def find_verb(input_string):
         if start_flag > 0:  # start flag가 0이라면 앞에 것 볼 필요X
             if is_have_tag('NNG', input_string[start_flag - 1]):  # start_flag 앞의 토큰이 명사라면
                 start_flag -= 1  # 시작 플래그를 하나 줄인다.
-        print('V:', end=' ')
         for k in range(start_flag, len(input_string)):  # start_flag부터 끝까지 서술어
             verb_table.append(input_string[k])
-        print(verb_table)
+
     return verb_table
 
 # 관형어를 찾는 함수 : 관형격 조사를 통해 관형어를 찾는 경우, 관형사를 관형어로 찾는 경우, 관형형 전성어미를 통해 관형어를 찾는 경우로 구성
-def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 친구를 만났다)와 체언의 자격을 가진 말 + 관형격 조사의 경우(ex.그는 웃기기의 천재다) 아직 처리 X)
-    mecab = Mecab()
-    temp_string = mecab.pos(input_string)
+def find_tubular(input_string, mecab_string):  # (체언 단독의 경우(ex.우연히 고향 친구를 만났다)와 체언의 자격을 가진 말 + 관형격 조사의 경우(ex.그는 웃기기의 천재다) 아직 처리 X)
+    temp_string = mecab_string
     tubularArr = []
 
     for i in range(len(temp_string)):
@@ -320,28 +311,6 @@ def find_tubular(input_string):  # (체언 단독의 경우(ex.우연히 고향 
             else:  # 관형형 전성어미가 다른 형태소에 포함되지 않고 나오는 경우(ex.('작', 'VA'), ('은', 'ETM'))
                 tubularArr.append(temp_string[i - 1])
                 tubularArr.append(temp_string[i])
-
-        # 체언의 자격을 가진 말 + 관형격 조사의 경우(ex.그는 웃기기의 천재다)에 대한 코드(아직 수정-ing)
-        # if temp_string[i][1].find('JKG') != -1:
-        #     jkgWord = temp_string[i][0]
-        #     inputIndex = input_string.find(jkgWord)
-        #     tubularTemp = ""
-        #     for j in reversed(range(inputIndex)):
-        #         if input_string[j] != ' ':
-        #             tubularTemp = tubularTemp + input_string[j]
-        #         elif input_string[j] == ' ':
-        #             break
-        #         elif j == 0:
-        #             break
-        #     tt = tubularTemp[::-1]
-        #     print(tt)
-        #     for k in range(len(temp_string)):
-        #         if temp_string[k][0].find(tt[0]) != -1:
-        #             while True:
-        #                 print(temp_string[k])
-        #                 if temp_string[k][1] == 'JKG':
-        #                     break
-        #                 k += 1
 
     return tubularArr  # 한 문장 안에 관형어는 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
 
