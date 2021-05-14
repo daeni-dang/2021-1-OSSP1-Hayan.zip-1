@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import json
 
 from django.http import HttpResponse
@@ -13,6 +14,7 @@ global script_index
 global q
 global trueSentenceIndex
 global falseSentenceIndex
+global element_table
 
 script_table = []
 voice_table = []
@@ -20,7 +22,7 @@ script_index = 0
 q = queue.Queue()
 trueSentenceIndex = []
 falseSentenceIndex = []
-total_table = np.empty((0, 10), dtype=list)
+element_table = np.empty((0, 10), dtype=list)
 
 
 def main(request):
@@ -144,7 +146,10 @@ def sentence_without_part(input_string, string_table):
         sentences.append(sentence)  #문장 추가
     return sentences
 
+
 def sentence_division(input_string):
+    global element_table
+
     mecab = Mecab()
 
     input_string = add_space_after_mot(input_string)  # '못' 뒤에 띄어쓰기 추가
@@ -153,7 +158,7 @@ def sentence_division(input_string):
     mecab_result = mecab.pos(input_string)  # ex) [('안녕', 'NNG'), ('하', 'XSV'), ('세요', 'EP+EF')]
 
     string_start = 0  # 각 문장의 첫번째 요소 가르키는 변수
-    cnt = 0 # 한 문장에 대해 형태소 분석이 안 된 문장을 index로 찾아가기 위한 변수
+    cnt = 0  # 한 문장에 대해 형태소 분석이 안 된 문장을 index로 찾아가기 위한 변수
     for i in range(len(mecab_result)):
         if is_sentence_End(mecab_result[i]):  # 문장의 마지막인지 판단
             sentence = []
@@ -164,17 +169,20 @@ def sentence_division(input_string):
                     continue
                 sentence.append(mecab_result[j])  # 각 요소를 현재 문장에 추가
             string_table.append(sentence)  # 완성된 한 문장을 테이블에 추가
-            origin_string_table = sentence_without_part(input_string, string_table)  # 형태소 분석이 안 된 origin 문장을 찾아서 저장(관형어 찾는 함수에서 사용하기 위해)
-            make_total_tb(sentence, origin_string_table[cnt])   # 한 문장에 대해 문장 요소들을 모두 저장해주고 그 문장들을 모은 테이블을 만듦
+            origin_string_table = sentence_without_part(input_string,
+                                                        string_table)  # 형태소 분석이 안 된 origin 문장을 찾아서 저장(관형어 찾는 함수에서 사용하기 위해)
+            one_line_temp = make_element_table(sentence, origin_string_table[cnt])
+            element_table = np.append(element_table, np.array([one_line_temp], dtype=list), axis=0)  # 행 추가
             cnt += 1
             string_start = i + 1  # 다음 문장의 첫 번째 요소를 가리킴.
-    return string_table
 
     # total_table에 잘 들어갔는지 확인하기 위해 출력하는 코드
-    # for i in range(len(total_table)):
-    #     for j in range(len(total_table[i])):
-    #         print(total_table[i][j], end=' ')
+    # for i in range(len(element_table)):
+    #     for j in range(len(element_table[i])):
+    #         print(element_table[i][j], end=' ')
     #     print()
+
+    return string_table
 
     # sentence_division 함수를 한번 실행하면 total_table 완성! total_table은 global 변수 이므로 함수 실행 후 사용하면 됨!
     # 문제! : 다은이 -> 다(MAG) + 은이(NNG) : MAG 삭제
@@ -183,21 +191,21 @@ def sentence_division(input_string):
 # 대본에 대해 문장별로 요소들을 정리하여 total_table에 담는 함수
 # | 주어 | 목적어 | 서술어 | 관형어 | 부사어 | 보어 | 부정의 의미인지 아닌지 flag | 시제 flag | 아무것도 아닌거 |
 # |  0  |   1   |   2   |   3   |   4   |  5  |            6            |    7     |       8      |
-def make_total_tb(mecab_sentence, origin_sentence):
+def make_element_table(mecab_sentence, origin_sentence):
 
-    global total_table
-    divide_temp = [[], [], [], [], [], [], [], [], [], []]
+    divide_line = [[], [], [], [], [], [], [], [], [], []]
 
-    divide_temp[0].extend(find_s(mecab_sentence))
-    divide_temp[1].extend(find_o(mecab_sentence))
-    divide_temp[2].extend(find_verb(mecab_sentence))
-    divide_temp[3].extend(find_tubular(origin_sentence, mecab_sentence))
-    divide_temp[4].extend(find_adverb(mecab_sentence))
-    divide_temp[5].extend(find_complement(mecab_sentence))
-    # divide_temp[6].extend()   # 부정 flag
-    divide_temp[7].extend(tense_to_flag(mecab_sentence))
-    # divide_temp[8].extend()   # 문장 요소 검사에 아무것도 속하지 않는 경우
-    total_table = np.append(total_table, np.array([divide_temp], dtype=list), axis=0)  # 행 추가
+    divide_line[0].extend(find_s(mecab_sentence))
+    divide_line[1].extend(find_o(mecab_sentence))
+    divide_line[2].extend(find_verb(mecab_sentence))
+    divide_line[3].extend(find_tubular(origin_sentence, mecab_sentence))
+    divide_line[4].extend(find_adverb(mecab_sentence))
+    divide_line[5].extend(find_complement(mecab_sentence))
+    # divide_line[6].extend()
+    divide_line[7].extend(tense_to_flag(mecab_sentence))
+    # divide_line[8].extend()
+
+    return divide_line
 
 # 주어 찾는 함수
 def find_s(sentence):
