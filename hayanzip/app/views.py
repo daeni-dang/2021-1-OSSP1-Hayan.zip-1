@@ -58,12 +58,18 @@ def main(request):
                         one_sentence += q.get()
                     voice_table = sentence_division(one_sentence)
 
-                    if script_index < len(script_table):  # list index out of range 처리
-                        if super_compare(script_index, voice_table[0], one_sentence):
-                            trueSentenceIndex.append(script_index)
-                        else:
-                            falseSentenceIndex.append(script_index)
-                        script_index += 1
+                    for i in range(script_index-6, script_index+6): #앞 뒤 여섯 문장까지 검사
+                        if i<0: #범위 벗어날 때 처리
+                            continue
+                        if i>=len(script_table): #범위 벗어날 때 처리
+                            break
+                        if i in trueSentenceIndex: #이미 말한 문장에 있으면 다음 문장 검사
+                            continue
+                        if super_compare(i, voice_table[0], one_sentence): #맞는 문장 찾았다면 그만 검사
+                            trueSentenceIndex.append(i)
+                            break
+
+                    script_index += 1
             data = {    #Json으로 넘길 data 생성
                 'trueSentenceIndex': trueSentenceIndex,
                 'falseSentenceIndex': falseSentenceIndex
@@ -96,12 +102,13 @@ def change_taxis_compare(script_sentence_component, voice_sentence, origin_sente
     print(script_sentence_component)
     for i in range(0, 7):
         for j in range(0, len(script_sentence_component[i])):
-            print("script----------------")
-            print(script_sentence_component[i][j][0])
-            print("voice----------------")
-            print(script_sentence_component[i][j][0])
-            if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
-                return False
+            if voice_sentence_component[i]:
+                print("script----------------")
+                print(script_sentence_component[i][j][0])
+                print("voice----------------")
+                print(voice_sentence_component[i][j][0])
+                if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
+                    return False
 
     return True
 
