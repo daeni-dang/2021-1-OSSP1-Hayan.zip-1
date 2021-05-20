@@ -79,9 +79,10 @@ def main(request):
     return render(request, 'app/main.html')
 
 def super_compare(script_index, voice_sentence, one_sentence):
+    voice_sentence_component = make_element_table(voice_sentence, one_sentence)
     if simple_compare(script_table[script_index], voice_sentence):
         return True
-    elif change_taxis_compare(element_table[script_index], voice_sentence, one_sentence):
+    elif change_taxis_compare(element_table[script_index], voice_sentence_component, one_sentence):
         return True
     else:
         return False
@@ -94,19 +95,10 @@ def simple_compare(script_sentence, voice_sentence):
             return False
     return True
 
-def change_taxis_compare(script_sentence_component, voice_sentence, origin_sentence):
-    voice_sentence_component = make_element_table(voice_sentence, origin_sentence)
-    print("voice_sentence_component")
-    print(voice_sentence_component)
-    print("script_sentence_component")
-    print(script_sentence_component)
+def change_taxis_compare(script_sentence_component, voice_sentence_component, origin_sentence):
     for i in range(0, 7):
         for j in range(0, len(script_sentence_component[i])):
             if voice_sentence_component[i]:
-                print("script----------------")
-                print(script_sentence_component[i][j][0])
-                print("voice----------------")
-                print(voice_sentence_component[i][j][0])
                 if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
                     return False
 
