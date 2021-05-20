@@ -224,6 +224,7 @@ def sentence_division(input_string):
 def make_element_table(mecab_sentence, origin_sentence):
 
     divide_line = [[], [], [], [], [], [], [], [], []]
+    other_element = []
 
     divide_line[0].extend(find_s(mecab_sentence))
     divide_line[1].extend(find_o(mecab_sentence))
@@ -231,7 +232,17 @@ def make_element_table(mecab_sentence, origin_sentence):
     divide_line[3].extend(find_tubular(origin_sentence, mecab_sentence))
     divide_line[4].extend(find_adverb(mecab_sentence))
     divide_line[5].extend(find_complement(mecab_sentence))
-    # divide_line[6].extend()
+
+    for i in range(len(mecab_sentence)):
+        flag = 0
+        for j in range(len(divide_line) - 3):
+            for k in range(len(divide_line[j])):
+                if mecab_sentence[i] == divide_line[j][k]:
+                    flag = 1
+        if flag == 0:
+            other_element.append(mecab_sentence[i])
+
+    divide_line[6].extend(other_element)
     divide_line[7].extend(tense_to_flag(mecab_sentence))
     # divide_line[8].extend()
 
