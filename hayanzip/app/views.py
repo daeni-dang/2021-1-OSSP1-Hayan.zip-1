@@ -63,7 +63,6 @@ def main(request):
             for i in range(len(mecab_result)):
                 q.put(mecab_result[i][0])
                 if is_sentence_End(mecab_result[i]):
-                    print(mecab_result[i])
                     one_sentence = ""
                     for j in range(0, q.qsize()):
                         one_sentence += q.get()
@@ -98,12 +97,14 @@ def super_compare(script_index, voice_sentence, one_sentence):
     voice_sentence_component = make_element_table(voice_sentence, one_sentence)
     if simple_compare(script_table[script_index], voice_sentence):
         return True
-    elif change_taxis_compare(element_table[script_index], voice_sentence_component, one_sentence):
+    elif change_taxis_compare(element_table[script_index], voice_sentence_component):
         return True
     elif j_compare(element_table[script_index], voice_sentence_component):
         return True
-    elif flag_true_compare(element_table[script_index], voice_sentence_component):
+    elif change_active_passive(element_table[script_index], voice_sentence_component):
         return True
+    elif not flag_true_compare(element_table[script_index], voice_sentence_component):
+         return False
     else:
         return False
 
@@ -115,7 +116,7 @@ def simple_compare(script_sentence, voice_sentence):
             return False
     return True
 
-def change_taxis_compare(script_sentence_component, voice_sentence_component, origin_sentence):
+def change_taxis_compare(script_sentence_component, voice_sentence_component):
     for i in range(0, 7):
         for j in range(0, len(script_sentence_component[i])):
             if voice_sentence_component[i]:
@@ -134,14 +135,7 @@ def flag_true_compare(script_sentence_component, voice_sentence_component):
     else:
         return False
 
-
-def add_space_after_mot(input_string):  # '못' 뒤에 띄어쓰기 추가하는 함수 : '못'을 기준으로 split한 후, 각 요소 사이에 '못+공백'을 추가하여 합침.
-    split_neg = input_string.split('못')
-    for i in range(len(split_neg)):
-        string = '못 '.join(split_neg)
-    return string
-
-def j_compare(script_sentence_component, voice_sentence_component):
+def j_compare(script_sentence_component, voice_sentence_component):     # 조사가 바뀌었을 때 일치 판정 함수
     for i in range(len(voice_sentence_component)):
          for j in range(len(voice_sentence_component[i])):
             print(voice_sentence_component[i][j], end=' ')
@@ -175,6 +169,72 @@ def j_compare(script_sentence_component, voice_sentence_component):
                     return False
 
     return True
+
+def change_active_passive(script_sentence_component, voice_sentence_component):
+    # script : 능동 / voice : 피동
+    subject_equal_adverb = False  # script 주어와 voice 부사어 같은가
+    object_equal_subject = False  # script 목적어와 voice 주어 같은가
+    verb_equal = False  # 본동사 일치하는가
+
+    if script_sentence_component[0] and voice_sentence_component[4] and script_sentence_component[1] and voice_sentence_component[0] \
+            and script_sentence_component[2] and voice_sentence_component[2]:
+
+        for i in range(0, len(voice_sentence_component[4])):  # script의 주어가 voice 부사어에 있나 확인
+            if (script_sentence_component[0][0][0] == voice_sentence_component[4][i][0]):
+                subject_equal_adverb = True
+
+        if script_sentence_component[1][0][0] == voice_sentence_component[0][0][0]:  # script 목적어와 voice 주어가 같나 확인
+            object_equal_subject = True
+
+        for i in range(0, len(script_sentence_component[2])):  # script의 본 동사 찾기
+            if (script_sentence_component[2][i][1].find("VV") != -1):
+                script_verb = script_sentence_component[2][i][0]
+        for i in range(0, len(voice_sentence_component[2])):  # voice의 본 동사 찾기
+            if (voice_sentence_component[2][i][1].find("VV") != -1):
+                voice_verb = voice_sentence_component[2][i][0]
+
+        if script_verb.find(voice_verb) != -1 or voice_verb.find(
+                script_verb) != -1:  # script의 본동사와 voice의 본동사가 일치하는 부분이 있으면 true
+            verb_equal = True
+
+        if subject_equal_adverb == True and object_equal_subject == True and verb_equal == True:
+            return True
+
+    # script : 피동 / voice : 능동
+    subject_equal_object = False  # script 주어와 voice 목적어가 같은가
+    adverb_equal_subject = False  # script 부사어와 voice 주어가 같은가
+    verb_equal = False  # 본동사 일치하는가
+    if script_sentence_component[0] and voice_sentence_component[1] and script_sentence_component[4] and voice_sentence_component[0] \
+            and script_sentence_component[2] and voice_sentence_component[2]:
+
+        if script_sentence_component[0][0][0] == voice_sentence_component[1][0][0]:  # script 주어와 voice 목적어가 같은가
+            subject_equal_object = True
+
+        for i in range(0, len(script_sentence_component[4])):
+            if script_sentence_component[4][i][0] == voice_sentence_component[0][0][0]:  # script 부사어와 voice 주어가 같은가
+                adverb_equal_subject = True
+
+        for i in range(0, len(script_sentence_component[2])):  # script의 본 동사 찾기
+            if script_sentence_component[2][i][1].find("VV") != -1:
+                script_verb = script_sentence_component[2][i][0]
+        for i in range(0, len(voice_sentence_component[2])):  # voice의 본 동사 찾기
+            if voice_sentence_component[2][i][1].find("VV") != -1:
+                voice_verb = voice_sentence_component[2][i][0]
+
+        if script_verb.find(voice_verb) != -1 or voice_verb.find(
+                script_verb) != -1:  # script의 본동사와 voice의 본동사가 일치하는 부분이 있으면 true
+            verb_equal = True
+
+        if subject_equal_object == True or adverb_equal_subject == True or verb_equal == True:
+            return True
+
+    return False
+
+def add_space_after_mot(input_string):  # '못' 뒤에 띄어쓰기 추가하는 함수 : '못'을 기준으로 split한 후, 각 요소 사이에 '못+공백'을 추가하여 합침.
+    split_neg = input_string.split('못')
+    for i in range(len(split_neg)):
+        string = '못 '.join(split_neg)
+    return string
 
 def is_sentence_End(last_token):  # 문장의 마지막인지 판단 : EF[종결어미] 이거나 EC(연결어미)로 분석된 마지막 요소
     # find('str')는 str의 위치를 반환하는 함수. 없을 때는 -1 반환
