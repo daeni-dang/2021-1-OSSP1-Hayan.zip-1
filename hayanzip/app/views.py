@@ -209,6 +209,27 @@ def is_have_tag(what_find, token):
         return True
     else:
         return False
+def sentence_without_part2(text):   #연결어미로 끝나지 않을 때 포함하여 원본 반환
+    mecab = Mecab()
+    sentences=[]
+    index=0
+    mecab_text = mecab.pos(text)
+    sentence = ''
+    for i in range(0,len(mecab_text)):
+        sentence = text
+        if is_sentence_End(mecab_text[i]):
+            index=text.find(mecab_text[i][0])
+            index+=len(mecab_text[i][0])
+            if(i<len(mecab_text)-1):
+                if is_mark(mecab_text[i+1]):
+                    index+=1
+            sentence=text[:index]
+            text=text[index:]
+            sentences.append(sentence)
+
+    if not (text.isspace()) and text!='':
+        sentences.append(text)
+    return sentences
 
 def sentence_without_part(input_string, string_table):
     #형태소 구분 없이 문자열로만 string 문장 구분
