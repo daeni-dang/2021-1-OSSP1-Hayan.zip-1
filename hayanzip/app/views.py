@@ -202,18 +202,28 @@ def sentence_division(input_string):
                     continue
                 sentence.append(mecab_result[j])  # 각 요소를 현재 문장에 추가
             string_table.append(sentence)  # 완성된 한 문장을 테이블에 추가
-            origin_string_table = sentence_without_part(input_string,
-                                                        string_table)  # 형태소 분석이 안 된 origin 문장을 찾아서 저장(관형어 찾는 함수에서 사용하기 위해)
+            origin_string_table = sentence_without_part(input_string, string_table)  # 형태소 분석이 안 된 origin 문장을 찾아서 저장(관형어 찾는 함수에서 사용하기 위해)
             one_line_temp = make_element_table(sentence, origin_string_table[cnt])
-            element_table = np.append(element_table, np.array([one_line_temp], dtype=list), axis=0)  # 행 추가
+            element_table = np.append(element_table, np.array([one_line_temp], dtype=list), axis=0)  # element_table 행 추가
+            modifier_table.append(make_modifier_table(origin_string_table[cnt], sentence))  # modifier_table 행 추가
             cnt += 1
             string_start = i + 1  # 다음 문장의 첫 번째 요소를 가리킴.
 
-    # total_table에 잘 들어갔는지 확인하기 위해 출력하는 코드
+    # element_table에 잘 들어갔는지 확인하기 위해 출력하는 코드
+    # print("=================================")
     # for i in range(len(element_table)):
     #     for j in range(len(element_table[i])):
-    #         print(element_table[i][j], end=' ')
+    #         print(element_table[i][j], end='  ')
     #     print()
+    # print("=================================")
+
+    # modifier_table에 잘 들어갔는지 확인하기 위해 출력하는 코드
+    # print("=================================")
+    # for i in range(len(modifier_table)):
+    #     for j in range(len(modifier_table[i])):
+    #         print(modifier_table[i][j], end='  ')
+    #     print()
+    # print("=================================")
 
     return string_table
 
