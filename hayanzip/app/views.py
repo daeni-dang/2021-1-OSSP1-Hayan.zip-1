@@ -98,6 +98,8 @@ def super_compare(script_index, voice_sentence, one_sentence):
         return True
     elif change_taxis_compare(element_table[script_index], voice_sentence_component, one_sentence):
         return True
+    elif j_compare(element_table[script_index], voice_sentence_component):
+        return True
     elif flag_true_compare(element_table[script_index], voice_sentence_component):
         return True
     else:
@@ -137,6 +139,40 @@ def add_space_after_mot(input_string):  # '못' 뒤에 띄어쓰기 추가하는
         string = '못 '.join(split_neg)
     return string
 
+def j_compare(script_sentence_component, voice_sentence_component):
+    for i in range(len(voice_sentence_component)):
+         for j in range(len(voice_sentence_component[i])):
+            print(voice_sentence_component[i][j], end=' ')
+         print()
+    for i in range(len(script_sentence_component)):
+        for j in range(len(script_sentence_component[i])):
+            print(script_sentence_component[i][j], end=' ')
+        print()
+    for q in range(0, 2):
+        for k in range(0, len(script_sentence_component[q])):
+            if voice_sentence_component[q]:
+                print("script----------------")
+                print(script_sentence_component[q][k][0])
+                print("voice----------------")
+                print(voice_sentence_component[q][k][0])
+                if voice_sentence_component[q][k][1] == 'JX'or voice_sentence_component[q][k][1]=='JKS'or voice_sentence_component[q][k][1]=='JKO':
+                    continue
+                if script_sentence_component[q][k][0] != voice_sentence_component[q][k][0]:
+                    print("False")
+                    return False
+
+    for i in range(2, 7):
+        for j in range(0, len(script_sentence_component[i])):
+            if voice_sentence_component[i]:
+                print("script----------------")
+                print(script_sentence_component[i][j][0])
+                print("voice----------------")
+                print(voice_sentence_component[i][j][0])
+                if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
+                    print ("False")
+                    return False
+
+    return True
 
 def is_sentence_End(last_token):  # 문장의 마지막인지 판단 : EF[종결어미] 이거나 EC(연결어미)로 분석된 마지막 요소
     # find('str')는 str의 위치를 반환하는 함수. 없을 때는 -1 반환
