@@ -108,11 +108,14 @@
                         dataType: "json",
                         success: function(response){
                         //응답이 들어온 경우
-                        for(var i=0; i<response.trueSentenceIndex.length; i++){
+                            for(var i=0; i<response.trueSentenceIndex.length; i++){
                                 //true문장은 초록색
                                 document.getElementById('script'+response.trueSentenceIndex[i]).className='green-text';
                             }
+                            for(var i=0; i<response.yellowSentenceIndex.length; i++){
 
+                                document.getElementById('script'+response.yellowSentenceIndex[i]).className='yellow-text';
+                            }
                             for(var i=0; i<response.falseSentenceIndex.length; i++){
                                 //fasle문장은 빨간색
                                 document.getElementById('script'+response.falseSentenceIndex[i]).className='red-text';

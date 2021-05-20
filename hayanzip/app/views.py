@@ -23,7 +23,8 @@ q = queue.Queue()
 trueSentenceIndex = []
 falseSentenceIndex = []
 element_table = np.empty((0, 9), dtype=list)
-
+lastTrueIndex = -1
+yellowSentenceIndex = []
 
 def main(request):
     global script_table
@@ -31,8 +32,11 @@ def main(request):
     global script_index
     global q
     global trueSentenceIndex  # trueSentence의 index 저장할 공간
+    global lastTrueIndex
+    global yellowSentenceIndex
     global falseSentenceIndex  # falseSentence의 index 저장할 공간
     global element_table
+
 
     mecab = Mecab()
 
@@ -45,6 +49,8 @@ def main(request):
             script_string_array = sentence_without_part(text, script_table) #형태소 없는 배열
             script_index = 0
             trueSentenceIndex = []
+            lastTrueIndex = -1
+            yellowSentenceIndex = []
             falseSentenceIndex = []
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
@@ -63,15 +69,20 @@ def main(request):
                             continue
                         if i>=len(script_table): #범위 벗어날 때 처리
                             break
-                        if i in trueSentenceIndex: #이미 말한 문장에 있으면 다음 문장 검사
+                        if i in trueSentenceIndex or i in yellowSentenceIndex: #이미 말한 문장에 있으면 다음 문장 검사
                             continue
                         if super_compare(i, voice_table[0], one_sentence): #맞는 문장 찾았다면 그만 검사
-                            trueSentenceIndex.append(i)
+                            if lastTrueIndex>i:
+                                yellowSentenceIndex.append(i)
+                            else:
+                                trueSentenceIndex.append(i)
+                                lastTrueIndex=i
                             break
 
                     script_index += 1
             data = {    #Json으로 넘길 data 생성
                 'trueSentenceIndex': trueSentenceIndex,
+                'yellowSentenceIndex': yellowSentenceIndex,
                 'falseSentenceIndex': falseSentenceIndex
             }
             return HttpResponse(json.dumps(data), content_type="application/json")
