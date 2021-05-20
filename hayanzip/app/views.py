@@ -98,6 +98,8 @@ def super_compare(script_index, voice_sentence, one_sentence):
         return True
     elif change_taxis_compare(element_table[script_index], voice_sentence_component, one_sentence):
         return True
+    elif flag_true_compare(element_table[script_index], voice_sentence_component):
+        return True
     else:
         return False
 
@@ -117,6 +119,17 @@ def change_taxis_compare(script_sentence_component, voice_sentence_component, or
                     return False
 
     return True
+
+# 시제와 부정 표현이 모두 일치하는지 확인하는 함수
+def flag_true_compare(script_sentence_component, voice_sentence_component):
+    # 7: 시제가 맞는지 확인
+    # 8: 부정표현이 맞는지 확인
+    if script_sentence_component[7] == voice_sentence_component[7] \
+            and script_sentence_component[8] == voice_sentence_component[8]:
+        return True
+    else:
+        return False
+
 
 def add_space_after_mot(input_string):  # '못' 뒤에 띄어쓰기 추가하는 함수 : '못'을 기준으로 split한 후, 각 요소 사이에 '못+공백'을 추가하여 합침.
     split_neg = input_string.split('못')
@@ -257,7 +270,7 @@ def make_element_table(mecab_sentence, origin_sentence):
 
     divide_line[6].extend(other_element)
     divide_line[7].extend(tense_to_flag(mecab_sentence))
-    # divide_line[8].extend()
+    divide_line[8].extend(find_neg(mecab_sentence))
 
     return divide_line
 
@@ -511,3 +524,31 @@ def tense_to_flag(sentence):
             else:
                 tense_flag.append(1)
     return tense_flag
+
+# 부정표현 flag
+# 못, 안, 않, 말/마, 아니, 없 처리
+# 부정표현 개수가 홀수이면 부정(1), 짝수이면 이중 부정이므로 긍정(0)
+def find_neg(sentence):
+    neg_flag = []  # 부정표현 flag를 저장할 배열(1:부정, 0:긍정)
+    neg_cnt = 0  # 부정표현 개수를 세기 위한 변수
+    for i in range(len(sentence)):
+        if is_have_char('못', sentence[i]):
+            neg_cnt = neg_cnt + 1
+        if is_have_char('안', sentence[i]):
+            neg_cnt = neg_cnt + 1
+        if is_have_char('않', sentence[i]):
+            neg_cnt = neg_cnt + 1
+        if (is_have_char('말', sentence[i]) or is_have_char('마', sentence[i])) \
+                and is_have_tag('VX', sentence[i]):
+            neg_cnt = neg_cnt + 1
+        if is_have_char('아니', sentence[i]):
+            neg_cnt = neg_cnt + 1
+        if is_have_char('없', sentence[i]):
+            neg_cnt = neg_cnt + 1
+
+    if neg_cnt % 2 == 1:  # 부정
+        neg_flag.append(1)
+    else:
+        neg_flag.append(0)  # 긍정
+
+    return neg_flag
