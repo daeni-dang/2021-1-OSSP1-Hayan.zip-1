@@ -513,8 +513,26 @@ def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 �
     complementArr = []
     for i in range(len(temp_string)):
         if temp_string[i][1].find('JKC') != -1:  # 형태소 분석을 한 결과에서 보격 조사를 찾음
-            complementArr.append(temp_string[i - 1])
-            complementArr.append(temp_string[i])  # 보격 조사와 그 앞의 단어가 보어이므로 두 개 모두 list에 넣어줌
+            for j in range(0, i):# 문장 처음부터 보격 조사 까지
+                N_cnt = 0
+                if (temp_string[j][1] == 'NNG' or temp_string[j][1] == 'NNP' or
+                    temp_string[j][1] == 'NNB' or temp_string[j][1] == 'NP'):
+                    N_cnt = j # 보격 조사에 가장 가까운 명사를 찾아서
+            for k in range(j,i+1): #명사부터 보격 조사까지
+                 complementArr.append(temp_string[k]) # 저장
+        if temp_string[i][1].find('JKS') != -1:
+            do_jamo = j2hcj(h2j(temp_string[i+1][0]))
+            if (do_jamo[0] == 'ㄷ' and do_jamo[1] == 'ㅚ') or \
+                    (do_jamo[0] == 'ㄷ' and do_jamo[1] == 'ㅙ'):
+                for j in range(0, i):  # 문장 처음부터 보격 조사 까지
+                    N_cnt = 0
+                    if (temp_string[j][1] == 'NNG' or temp_string[j][1] == 'NNP' or
+                            temp_string[j][1] == 'NNB' or temp_string[j][1] == 'NP'):
+                        N_cnt = j  # 보격 조사에 가장 가까운 명사를 찾아서
+                for k in range(j, i + 1):  # 명사부터 보격 조사까지
+                    complementArr.append(temp_string[k])  # 저장
+
+    print(complementArr)
     return complementArr  # 한 문장 안에 보어가 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
 
 # 시제 찾는 함수
