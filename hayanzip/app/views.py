@@ -15,6 +15,7 @@ global q
 global trueSentenceIndex
 global falseSentenceIndex
 global element_table
+global modifier_table
 
 script_table = []
 voice_table = []
@@ -23,6 +24,7 @@ q = queue.Queue()
 trueSentenceIndex = []
 falseSentenceIndex = []
 element_table = np.empty((0, 9), dtype=list)
+modifier_table = []
 lastTrueIndex = -1
 yellowSentenceIndex = []
 
@@ -36,6 +38,7 @@ def main(request):
     global yellowSentenceIndex
     global falseSentenceIndex  # falseSentence의 index 저장할 공간
     global element_table
+    global modifier_table
 
 
     mecab = Mecab()
@@ -233,7 +236,7 @@ def make_element_table(mecab_sentence, origin_sentence):
     divide_line[4].extend(find_adverb(mecab_sentence))
     divide_line[5].extend(find_complement(mecab_sentence))
 
-    for i in range(len(mecab_sentence)):
+    for i in range(len(mecab_sentence)):    # 각 언어 요소들 검사에 해당하지 않는 모든 요소들을 찾아냄
         flag = 0
         for j in range(len(divide_line) - 3):
             for k in range(len(divide_line[j])):
@@ -247,6 +250,41 @@ def make_element_table(mecab_sentence, origin_sentence):
     # divide_line[8].extend()
 
     return divide_line
+
+# 체언을 꾸미는 말만 따로 모아놓는 테이블을 만드는 함수
+def make_modifier_table(input_string, mecab_string):
+    temp_string = mecab_string
+    temp_modifier = []
+
+    for i in range(len(temp_string)):
+        modifier_line = [[], [], []]
+        modifier_line_two = [[], []]
+        if temp_string[i][1].find('ETM') != -1:  # 관형형 전성어미를 통해 관형어를 찾음
+            if temp_string[i][1].find('+') != -1:  # 관형형 전성어미가 다른 형태소에 포함되어 나오는 경우(ex.('못생긴', 'VA+ETM'))
+                inputIndex = input_string.find(temp_string[i][0])
+                if temp_string[i - 1] == temp_string[len(temp_string) - 1]:  # 여러 개의 관형형 전성어미가 나올 경우 띄어쓰기로 각각을 구분하기 때문에 맨 앞의 관형형 전성어미에 대한 예외처리
+                    modifier_line_two[0].extend(temp_string[i])
+                    modifier_line_two[1].extend(temp_string[i + 1])
+                    temp_modifier.append(modifier_line_two)
+
+                elif input_string[inputIndex - 1] != ' ':  # 관형형 전성어미가 다른 형태소와 합성되어 있으며 그 앞에 다른 형태소가 나오는 경우 관형형 전성어미의 앞의 단어도 list에 추가(ex.('깨끗', 'XR'), ('한', 'XSA+ETM'))
+                    modifier_line[0].extend(temp_string[i - 1])
+                    modifier_line[1].extend(temp_string[i])
+                    modifier_line[2].extend(temp_string[i + 1])
+                    temp_modifier.append(modifier_line)
+
+                else:  # 관형형 전성어미가 붙어서 한번에 나오는 경우 그 단어만 관형어 list에 추가(ex.('아름다운', 'VA+ETM'))
+                    modifier_line_two[0].extend(temp_string[i])
+                    modifier_line_two[1].extend(temp_string[i + 1])
+                    temp_modifier.append(modifier_line_two)
+
+            else:  # 관형형 전성어미가 다른 형태소에 포함되지 않고 나오는 경우(ex.('작', 'VA'), ('은', 'ETM'))
+                modifier_line[0].extend(temp_string[i - 1])
+                modifier_line[1].extend(temp_string[i])
+                modifier_line[2].extend(temp_string[i + 1])
+                temp_modifier.append(modifier_line)
+
+    return temp_modifier
 
 # 주어 찾는 함수
 def find_s(sentence):
