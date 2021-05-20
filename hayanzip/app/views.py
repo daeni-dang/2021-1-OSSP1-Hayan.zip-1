@@ -7,6 +7,7 @@ from eunjeon import Mecab
 import queue
 from jamo import h2j, j2hcj
 import numpy as np
+import re
 
 # Create your views here.
 global script_table
@@ -50,7 +51,8 @@ def main(request):
             text = request.POST['inputStr']
             element_table = np.empty((0, 9), dtype=list)
             script_table = sentence_division(text) #형태소 포함된 배열
-            script_string_array = sentence_without_part(text, script_table) #형태소 없는 배열
+            script_string_array = sentence_without_part2(text) #형태소 없는 배열
+            each_sentence_division(script_string_array) # 문장 단위로 끊어진 배열로 문장 분석
             script_index = 0
             trueSentenceIndex = []
             lastTrueIndex = -1
@@ -310,6 +312,33 @@ def sentence_without_part(input_string, string_table):
         sentences.append(sentence)  #문장 추가
     return sentences
 
+def remove_marks(string): # 특수문자 제거 함수
+    return re.sub('[-=.#/?:$}]', '', string)
+
+def each_sentence_division(script_string_array): # 한 문장 단위로 끊어서 분석하는 함수
+    global element_table
+    mecab = Mecab()
+    string_table = []
+    count = 0
+
+    for each in script_string_array: # 문장 단위로 끊어져 저장되어 있는 배열에서 한 문장씩 (each) 형태소 분석
+        complete_sentence = []
+        sentence = str(each)
+        sentence = remove_marks(sentence) #특수문자 제거
+        sentence = add_space_after_mot(sentence) # '못' 띄어쓰기 처리
+        mecab_result = mecab.pos(sentence)
+
+        for i in range(len(mecab_result)):
+            complete_sentence.append(mecab_result[i])
+
+        string_table.append(complete_sentence) # 분석 완료된 문장을 string_table에 추가
+        #element_table, modifier_table 구성하는 작업
+        one_line_temp = make_element_table(complete_sentence, script_string_array[count])
+        element_table = np.append(element_table, np.array([one_line_temp], dtype=list), axis=0)
+        modifier_table.append(make_modifier_table(script_string_array[count], complete_sentence))
+        count += 1
+
+    #return string_table <- 나중에 필요하면 반환
 
 def sentence_division(input_string):
     global element_table
@@ -333,10 +362,12 @@ def sentence_division(input_string):
                     continue
                 sentence.append(mecab_result[j])  # 각 요소를 현재 문장에 추가
             string_table.append(sentence)  # 완성된 한 문장을 테이블에 추가
-            origin_string_table = sentence_without_part(input_string, string_table)  # 형태소 분석이 안 된 origin 문장을 찾아서 저장(관형어 찾는 함수에서 사용하기 위해)
-            one_line_temp = make_element_table(sentence, origin_string_table[cnt])
-            element_table = np.append(element_table, np.array([one_line_temp], dtype=list), axis=0)  # element_table 행 추가
-            modifier_table.append(make_modifier_table(origin_string_table[cnt], sentence))  # modifier_table 행 추가
+
+            #아래로는 each_sentence_division에서 해주는 작업이라서 주석처리 (음성인식이 대본 element_table 간섭 못하게 한 것)
+            # origin_string_table = sentence_without_part(input_string, string_table)  # 형태소 분석이 안 된 origin 문장을 찾아서 저장(관형어 찾는 함수에서 사용하기 위해)
+            # one_line_temp = make_element_table(sentence, origin_string_table[cnt])
+            # element_table = np.append(element_table, np.array([one_line_temp], dtype=list), axis=0)  # element_table 행 추가
+            # modifier_table.append(make_modifier_table(origin_string_table[cnt], sentence))  # modifier_table 행 추가
             cnt += 1
             string_start = i + 1  # 다음 문장의 첫 번째 요소를 가리킴.
 
