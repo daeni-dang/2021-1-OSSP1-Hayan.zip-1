@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from eunjeon import Mecab
 import queue
+from jamo import h2j, j2hcj
 import numpy as np
 
 # Create your views here.
@@ -505,8 +506,6 @@ def find_adverb(input_string):
 
     return adverbArr
 
-# 부정표현 flag
-
 # 보어를 찾는 함수 : 보격 조사를 찾고 보격 조사 앞에 있는 단어 + 보격 조사를 보어로 반환
 def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 판별 X)
     temp_string = input_string
@@ -532,7 +531,6 @@ def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 �
                 for k in range(j, i + 1):  # 명사부터 보격 조사까지
                     complementArr.append(temp_string[k])  # 저장
 
-    print(complementArr)
     return complementArr  # 한 문장 안에 보어가 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
 
 # 시제 찾는 함수
@@ -547,11 +545,13 @@ def find_tense(sentence):
     # | __________________________
 
     special_future = 0  # '것','이'를 처리하기 위한 변수
-    is_present_flag = True # 현재시제 판단 위한 변수
+    is_present_flag = True  # 현재시제 판단 위한 변수
     for i in range(len(sentence)):
         # 미래시제 1: '것''이'
         if sentence[i][1].find('NNB') != -1:
-            special_future = special_future + 1  # NNB 는 '것'이므로 ++함
+            do_jamo = j2hcj(h2j(sentence[i - 1][0])) # jamo를 이용해 분리(할->ㅎㅏㄹ)
+            if do_jamo[2] == 'ㄹ': # -ㄹ 것이 가 미래형으로 구분
+                special_future = special_future + 1  # NNB 는 '것'이므로 ++함
         if sentence[i][1].find('VCP') != -1:
             special_future = special_future + 1  # VCP 는 '이'이므로 ++함
         if special_future == 2:  # '것'과 '이'가 모두 존재하면 미래 시제로 판단
