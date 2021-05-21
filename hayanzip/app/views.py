@@ -61,32 +61,38 @@ def main(request):
             #print(sentence_without_part2(text))
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
-            mecab_result = mecab.pos(str)
-            for i in range(len(mecab_result)):
-                q.put(mecab_result[i][0])
-                if is_sentence_End(mecab_result[i]):
-                    one_sentence = ""
-                    for j in range(0, q.qsize()):
-                        one_sentence += q.get()
-                    voice_table = sentence_division(one_sentence)
+            voice_sentence = sentence_without_part2(str)
+            for i in range(len(voice_sentence)):
+                q.put(voice_sentence[i])
 
-                    for i in range(script_index-6, script_index+6): #앞 뒤 여섯 문장까지 검사
-                        if i<0: #범위 벗어날 때 처리
+            one_sentence = ''
+            for i in range(q.qsize()):
+                one_sentence += q.get() + ' '
+                mecab_result = mecab.pos(one_sentence)
+                if is_sentence_End(mecab_result[len(mecab_result) - 1]):
+                    voice_table = sentence_division(one_sentence)
+                    print(voice_table)
+                    print(mecab_result)
+                    for i in range(script_index - 6, script_index + 6):  # 앞 뒤 여섯 문장까지 검사
+                        if i < 0:  # 범위 벗어날 때 처리
                             continue
-                        if i>=len(script_table): #범위 벗어날 때 처리
+                        if i >= len(script_table):  # 범위 벗어날 때 처리
                             break
-                        if i in trueSentenceIndex or i in yellowSentenceIndex: #이미 말한 문장에 있으면 다음 문장 검사
+                        if i in trueSentenceIndex or i in yellowSentenceIndex:  # 이미 말한 문장에 있으면 다음 문장 검사
                             continue
-                        if super_compare(i, voice_table[0], one_sentence): #맞는 문장 찾았다면 그만 검사
-                            if lastTrueIndex>i:
+                        if super_compare(i, voice_table[0], one_sentence):  # 맞는 문장 찾았다면 그만 검사
+                            if lastTrueIndex > i:
                                 yellowSentenceIndex.append(i)
                             else:
                                 trueSentenceIndex.append(i)
-                                lastTrueIndex=i
+                                lastTrueIndex = i
                             break
-
                     script_index += 1
-            data = {    #Json으로 넘길 data 생성
+                    one_sentence = ''
+            if not (one_sentence.isspace() or one_sentence == ''):
+                q.put(one_sentence)
+
+            data = {  # Json으로 넘길 data 생성
                 'trueSentenceIndex': trueSentenceIndex,
                 'yellowSentenceIndex': yellowSentenceIndex,
                 'falseSentenceIndex': falseSentenceIndex
