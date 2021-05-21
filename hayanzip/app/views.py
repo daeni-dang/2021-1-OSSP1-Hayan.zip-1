@@ -153,7 +153,9 @@ def j_compare(script_sentence_component, voice_sentence_component):     # 조사
                 print(script_sentence_component[q][k][0])
                 print("voice----------------")
                 print(voice_sentence_component[q][k][0])
-                if voice_sentence_component[q][k][1] == 'JX'or voice_sentence_component[q][k][1]=='JKS'or voice_sentence_component[q][k][1]=='JKO':
+                if (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '은') or\
+                        (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '는')\
+                        or voice_sentence_component[q][k][1]=='JKS'or voice_sentence_component[q][k][1]=='JKO':
                     continue
                 if script_sentence_component[q][k][0] != voice_sentence_component[q][k][0]:
                     print("False")
