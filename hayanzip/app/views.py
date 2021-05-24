@@ -144,21 +144,8 @@ def flag_true_compare(script_sentence_component, voice_sentence_component):
         return False
 
 def j_compare(script_sentence_component, voice_sentence_component):     # 조사가 바뀌었을 때 일치 판정 함수
-    for i in range(len(voice_sentence_component)):
-         for j in range(len(voice_sentence_component[i])):
-            print(voice_sentence_component[i][j], end=' ')
-         print()
-    for i in range(len(script_sentence_component)):
-        for j in range(len(script_sentence_component[i])):
-            print(script_sentence_component[i][j], end=' ')
-        print()
     for q in range(0, 2):
         for k in range(0, len(script_sentence_component[q])):
-            if voice_sentence_component[q]:
-                print("script----------------")
-                print(script_sentence_component[q][k][0])
-                print("voice----------------")
-                print(voice_sentence_component[q][k][0])
                 if (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '은') or\
                         (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '는')\
                         or voice_sentence_component[q][k][1]=='JKS'or voice_sentence_component[q][k][1]=='JKO':
@@ -169,11 +156,6 @@ def j_compare(script_sentence_component, voice_sentence_component):     # 조사
 
     for i in range(2, 7):
         for j in range(0, len(script_sentence_component[i])):
-            if voice_sentence_component[i]:
-                print("script----------------")
-                print(script_sentence_component[i][j][0])
-                print("voice----------------")
-                print(voice_sentence_component[i][j][0])
                 if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
                     print ("False")
                     return False
@@ -493,8 +475,8 @@ def find_s(sentence):
                         sentence[jx][0] == '는' and sentence[jx][1] == 'JX')):
                     jx_cnt += 1
             if (jks_cnt < 0 and jx_cnt < 0):  # 만약 주격 조사가 없으면
+                N_cnt = 0
                 for z in range(0, k):  # 은, 는 앞에 있는 것들중
-                    N_cnt = 0
                     if (sentence[z][1] == 'NNG' or sentence[z][1] == 'NNP' or sentence[z][1] == 'NNB' or sentence[z][
                         1] == 'NP'):
                         # 명사에 해당 되는 것들 중에
@@ -527,8 +509,8 @@ def find_o(sentence):
                         sentence[jx][0] == '는' and sentence[jx][1] == 'JX')):
                     jx_cnt += 1
             if (jks_cnt >= 0 or jx_cnt >= 0):  # 주격 조사가 있으면
+                N_cnt = 0
                 for z in range(0, k):  # 은, 는 앞에 있는 것들중
-                    N_cnt = 0
                     if (sentence[z][1] == 'NNG' or sentence[z][1] == 'NNP' or sentence[z][1] == 'NNB' or sentence[z][
                         1] == 'NP'):
                         # 명사에 해당 되는 것들 중에
