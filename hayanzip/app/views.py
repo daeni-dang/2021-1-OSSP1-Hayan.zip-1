@@ -107,10 +107,9 @@ def super_compare(script_index, voice_sentence, one_sentence):
         return True
     if change_taxis_compare(element_table[script_index], voice_sentence_component):
         return True
-    if not change_active_passive(element_table[script_index], voice_sentence_component):
-        return False
-    if not j_compare(element_table[script_index], voice_sentence_component):
-        return False
+    if element_table[script_index][0][0][0] != voice_sentence_component[0][0][0]:
+        if not change_active_passive(element_table[script_index], voice_sentence_component):
+            return False
     if not flag_true_compare(element_table[script_index], voice_sentence_component):
          return False
     return True
