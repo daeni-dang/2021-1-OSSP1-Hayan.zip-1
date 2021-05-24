@@ -453,6 +453,10 @@ def find_s(sentence):
     s_table = []  # 주어들만 저장할 테이블
     for k in range(len(sentence)):  # 테이블에 저장된 한 문장 길이 동안
         if ((sentence[k][0] == '가' and sentence[k][1] == 'JKS') or (sentence[k][0] == '이' and sentence[k][1] == 'JKS')):
+            do_jamo = j2hcj(h2j(sentence[k + 1][0])) # 뒤에 '되', '돼'가 오면 보어로 처리해야함
+            if (do_jamo[0] == 'ㄷ' and do_jamo[1] == 'ㅚ') or \
+                    (do_jamo[0] == 'ㄷ' and do_jamo[1] == 'ㅙ'):
+                break
             # 가,이 중 주격 조사인 것들에 한해
             cnt = 0
             for m in range(0, k):  # 주격 조사 앞에 있는 것들중
@@ -593,12 +597,12 @@ def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 �
     complementArr = []
     for i in range(len(temp_string)):
         if temp_string[i][1].find('JKC') != -1:  # 형태소 분석을 한 결과에서 보격 조사를 찾음
-            for j in range(0, i):# 문장 처음부터 보격 조사 까지
+            for j in range(0, i): # 문장 처음부터 보격 조사 까지
                 N_cnt = 0
                 if (temp_string[j][1] == 'NNG' or temp_string[j][1] == 'NNP' or
                     temp_string[j][1] == 'NNB' or temp_string[j][1] == 'NP'):
                     N_cnt = j # 보격 조사에 가장 가까운 명사를 찾아서
-            for k in range(j,i+1): #명사부터 보격 조사까지
+            for k in range(N_cnt,i+1): #명사부터 보격 조사까지
                  complementArr.append(temp_string[k]) # 저장
         if temp_string[i][1].find('JKS') != -1:
             do_jamo = j2hcj(h2j(temp_string[i+1][0]))
@@ -609,7 +613,7 @@ def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 �
                     if (temp_string[j][1] == 'NNG' or temp_string[j][1] == 'NNP' or
                             temp_string[j][1] == 'NNB' or temp_string[j][1] == 'NP'):
                         N_cnt = j  # 보격 조사에 가장 가까운 명사를 찾아서
-                for k in range(j, i + 1):  # 명사부터 보격 조사까지
+                for k in range(N_cnt, i + 1):  # 명사부터 보격 조사까지
                     complementArr.append(temp_string[k])  # 저장
 
     return complementArr  # 한 문장 안에 보어가 여러 개가 될 수 있으므로 list의 형식으로 값을 반환
@@ -690,7 +694,7 @@ def find_neg(sentence):
     for i in range(len(sentence)):
         if is_have_char('못', sentence[i]):
             neg_cnt = neg_cnt + 1
-        if is_have_char('안', sentence[i]):
+        if is_have_char('안', sentence[i]) and is_have_tag('MAG', sentence[i]):
             neg_cnt = neg_cnt + 1
         if is_have_char('않', sentence[i]):
             neg_cnt = neg_cnt + 1
