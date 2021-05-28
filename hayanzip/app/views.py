@@ -82,11 +82,13 @@ def main(request):
                     voice_table = sentence_division(one_sentence)
                     print(voice_table)
                     print(mecab_result)
-                    for i in range(script_index - 6, script_index + 6):  # 앞 뒤 여섯 문장까지 검사
+                    index_arr = [0, 1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6]
+                    index_arr = [script_index + x for x in index_arr]
+                    for i in index_arr:  # 앞 뒤 여섯 문장까지 검사
                         if i < 0:  # 범위 벗어날 때 처리
                             continue
                         if i >= len(script_table):  # 범위 벗어날 때 처리
-                            break
+                            continue
                         if i in trueSentenceIndex or i in yellowSentenceIndex:  # 이미 말한 문장에 있으면 다음 문장 검사
                             continue
                         if super_compare(i, voice_table[0], one_sentence):  # 맞는 문장 찾았다면 그만 검사
@@ -95,8 +97,8 @@ def main(request):
                             else:
                                 trueSentenceIndex.append(i)
                                 lastTrueIndex = i
+                                script_index = i+1
                             break
-                    script_index += 1
                     one_sentence = ''
             if not (one_sentence.isspace() or one_sentence == ''):
                 q.put(one_sentence)
