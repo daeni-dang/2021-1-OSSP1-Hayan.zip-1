@@ -146,27 +146,32 @@ def flag_true_compare(script_sentence_component, voice_sentence_component):
         return False
 
 def j_compare(script_sentence_component, voice_sentence_component):     # 조사가 바뀌었을 때 일치 판정 함수
-    for z in range (0,7):
-        if script_sentence_component[z] and voice_sentence_component[z]:
 
              for q in range(0, 2):
-                for k in range(0, len(script_sentence_component[q])):
-                     if (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '은') or\
-                            (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '는')\
-                             or voice_sentence_component[q][k][1]=='JKS'or voice_sentence_component[q][k][1]=='JKO':
-                         continue
-                     else:
-                        if script_sentence_component[q][k][0] != voice_sentence_component[q][k][0]:
-                             print("False")
-                             return False
+                if len(voice_sentence_component[q]) == len(script_sentence_component[q]):
+                    for k in range(0, len(voice_sentence_component[q])):
+                         if (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '은') or\
+                                (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '는')\
+                                 or voice_sentence_component[q][k][1]=='JKS'or voice_sentence_component[q][k][1]=='JKO':
+                                 continue
+                         else:
+                            if script_sentence_component[q][k][0] != voice_sentence_component[q][k][0]:
+                                print("False")
+                                return False
+                else:
+                    return False
 
              for i in range(2, 7):
-                  for j in range(0, len(script_sentence_component[i])):
+                 if len(voice_sentence_component[i]) == len(script_sentence_component[i]):
+                   for j in range(0, len(voice_sentence_component[i])):
+                      if script_sentence_component[i][j] and voice_sentence_component[i][j]:
                         if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
                             print ("False")
                             return False
+                 else :
+                     return False
 
-        return True
+             return True
 
 def change_active_passive(script_sentence_component, voice_sentence_component):
     # script : 능동 / voice : 피동
