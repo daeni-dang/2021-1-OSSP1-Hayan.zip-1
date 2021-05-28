@@ -107,12 +107,14 @@ def super_compare(script_index, voice_sentence, one_sentence):
         return True
     if change_taxis_compare(element_table[script_index], voice_sentence_component):
         return True
-    if element_table[script_index][0][0][0] != voice_sentence_component[0][0][0]:
-        if not change_active_passive(element_table[script_index], voice_sentence_component):
-            return False
     if not flag_true_compare(element_table[script_index], voice_sentence_component):
          return False
-    return True
+    if j_compare(element_table[script_index], voice_sentence_component):
+        return True
+    elif change_active_passive(element_table[script_index], voice_sentence_component):
+        return True
+
+    return False
 
 def simple_compare(script_sentence, voice_sentence):
     if len(script_sentence) != len(voice_sentence):
