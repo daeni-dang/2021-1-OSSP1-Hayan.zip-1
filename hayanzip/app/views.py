@@ -48,6 +48,12 @@ def main(request):
     if request.method == 'POST':
         str = request.POST.get('final_str', None)
         if str == None:  # 대본 입력됐을 경우
+            # 새로 대본 들어오면 요소 초기화
+            script_table = []
+            voice_table = []
+            element_table = []
+            modifier_table = []
+
             text = request.POST['inputStr']
             element_table = np.empty((0, 9), dtype=list)
             script_table = sentence_division(text) #형태소 포함된 배열
@@ -61,6 +67,9 @@ def main(request):
             #print(sentence_without_part2(text))
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
+            if str[len(str)-2] == "니" and str[len(str)-1] == "다": # ~니다 꼴이면 끝에 . 추가
+                str += '.'
+
             voice_sentence = sentence_without_part2(str)
             for i in range(len(voice_sentence)):
                 q.put(voice_sentence[i])
@@ -68,6 +77,7 @@ def main(request):
             one_sentence = ''
             for i in range(q.qsize()):
                 one_sentence += q.get() + ' '
+                one_sentence = remove_marks(one_sentence)
                 mecab_result = mecab.pos(one_sentence)
                 if is_sentence_End(mecab_result[len(mecab_result) - 1]):
                     voice_table = sentence_division(one_sentence)
@@ -314,7 +324,7 @@ def sentence_without_part(input_string, string_table):
     return sentences
 
 def remove_marks(string): # 특수문자 제거 함수
-    return re.sub('[-=.#/?:$}]', '', string)
+    return re.sub('[-~!@#$%^&*()_+|=\:";\'[]{},./<>?]', '', string)
 
 def each_sentence_division(script_string_array): # 한 문장 단위로 끊어서 분석하는 함수
     global element_table
