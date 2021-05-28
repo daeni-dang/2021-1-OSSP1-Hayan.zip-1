@@ -67,7 +67,8 @@ def main(request):
             #print(sentence_without_part2(text))
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
-
+            # '좋아합니다' 꼴 처리 함수
+            str = add_period(str)
             voice_sentence = sentence_without_part2(str)
             for i in range(len(voice_sentence)):
                 q.put(voice_sentence[i])
@@ -260,6 +261,15 @@ def add_space_after_mot(input_string):  # '못' 뒤에 띄어쓰기 추가하는
         string = '못 '.join(split_neg)
     return string
 
+def add_period(input_string): # 음성인식된 문장의 '좋아합니다' 뒤에 . 추가
+    index = input_string.find('좋아합니다')
+    result = input_string
+    if index != -1:
+        index += 5
+        result = input_string[:index] + '.' + input_string[index:]
+    print(result)
+    return result
+
 def is_sentence_End(last_token):  # 문장의 마지막인지 판단 : EF[종결어미] 이거나 EC(연결어미)로 분석된 마지막 요소
     # find('str')는 str의 위치를 반환하는 함수. 없을 때는 -1 반환
     # 문장의 마지막 형태소일 때(즉, EF[종결어미]를 만났을 때)
@@ -335,7 +345,7 @@ def sentence_without_part(input_string, string_table):
     return sentences
 
 def remove_marks(string): # 특수문자 제거 함수
-    return re.sub('[-~!@#$%^&*()_+|=\:";\'[]{},./<>?]', '', string)
+    return re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', string)
 
 def each_sentence_division(script_string_array): # 한 문장 단위로 끊어서 분석하는 함수
     global element_table
