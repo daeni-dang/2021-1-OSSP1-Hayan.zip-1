@@ -116,6 +116,14 @@ def super_compare(script_index, voice_sentence, one_sentence):
         return True
     if change_taxis_compare(element_table[script_index], voice_sentence_component):
         return True
+    if not subject_compare(element_table[script_index], voice_sentence_component):
+        if change_active_passive(element_table[script_index], voice_sentence_component):
+            return True
+        return False
+    if not object_compare(element_table[script_index], voice_sentence_component):
+        return False
+    if not predicate_compare(element_table[script_index], voice_sentence_component):
+        return False
     if not flag_true_compare(element_table[script_index], voice_sentence_component):
          return False
     if j_compare(element_table[script_index], voice_sentence_component):
@@ -157,6 +165,53 @@ def change_taxis_compare(script_sentence_component, voice_sentence_component):
 
     return True
 
+def subject_compare(script_sentence, voice_sentence):       # 주어 일치 확인
+    if script_sentence[0]:
+        if voice_sentence[0]:
+            if find_N(script_sentence[0]) == find_N(voice_sentence[0]): return True
+            else: return False
+        else: return False
+    else:
+        if voice_sentence[0]: return False
+        else: return True
+
+def object_compare(script_sentence, voice_sentence):        # 목적어 일치 확인
+    if script_sentence[1]:
+        if voice_sentence[1]:
+            if find_N(script_sentence[1]) == find_N(voice_sentence[1]): return True
+            else: return False
+        else: return False
+    else:
+        if voice_sentence[1]: return False
+        else: return True
+
+def predicate_compare(script_sentence, voice_sentence):        # 본동사 일치 확인
+    if script_sentence[2]:
+        if voice_sentence[2]:
+            for s_index in range(len(script_sentence[2])):
+                if script_sentence[2][s_index][1].find('VV') != -1:
+                    break
+            for v_index in range(len(voice_sentence[2])):
+                if voice_sentence[2][v_index][1].find('VV') != -1:
+                    break
+            if script_sentence[2][s_index][0] == voice_sentence[2][v_index][0]:
+                return True
+        else: return False
+    else:
+        if voice_sentence[2]: return False
+        else: return True
+    return False
+
+def find_N(block):
+    s = []
+    for i in range(len(block)):
+        if block[i][1] == 'JKS' or block[i][1] == 'JKC' or block[i][1] == 'JKG' or block[i][1] == 'JKO' or \
+            block[i][1] == 'JKB' or block[i][1] == 'JKV' or block[i][1] == 'JKQ' or block[i][1] == 'JX' or \
+            block[i][1] == 'JC':
+            continue
+        else: s.append(block[i])
+        return s
+
 # 시제와 부정 표현이 모두 일치하는지 확인하는 함수
 def flag_true_compare(script_sentence_component, voice_sentence_component):
     # 7: 시제가 맞는지 확인
@@ -167,33 +222,32 @@ def flag_true_compare(script_sentence_component, voice_sentence_component):
     else:
         return False
 
-def j_compare(script_sentence_component, voice_sentence_component):     # 조사가 바뀌었을 때 일치 판정 함수
 
-             for q in range(0, 2):
-                if len(voice_sentence_component[q]) == len(script_sentence_component[q]):
-                    for k in range(0, len(voice_sentence_component[q])):
-                         if (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '은') or\
-                                (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '는')\
-                                 or voice_sentence_component[q][k][1]=='JKS'or voice_sentence_component[q][k][1]=='JKO':
-                                 continue
-                         else:
-                            if script_sentence_component[q][k][0] != voice_sentence_component[q][k][0]:
-                                print("False")
-                                return False
+def j_compare(script_sentence_component, voice_sentence_component):  # 조사가 바뀌었을 때 일치 판정 함수
+    for q in range(0, 2):
+        if len(voice_sentence_component[q]) == len(script_sentence_component[q]):
+            for k in range(0, len(voice_sentence_component[q])):
+                if (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '은') or \
+                        (voice_sentence_component[q][k][1] == 'JX' and voice_sentence_component[q][k][0] == '는') \
+                        or voice_sentence_component[q][k][1] == 'JKS' or voice_sentence_component[q][k][1] == 'JKO':
+                    continue
                 else:
-                    return False
+                    if script_sentence_component[q][k][0] != voice_sentence_component[q][k][0]:
+                        print("False")
+                        return False
+        else:
+            return False
+    for i in range(2, 7):
+        if len(voice_sentence_component[i]) == len(script_sentence_component[i]):
+            for j in range(0, len(voice_sentence_component[i])):
+                if script_sentence_component[i][j] and voice_sentence_component[i][j]:
+                    if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
+                        print("False")
+                        return False
+        else:
+            return False
 
-             for i in range(2, 7):
-                 if len(voice_sentence_component[i]) == len(script_sentence_component[i]):
-                   for j in range(0, len(voice_sentence_component[i])):
-                      if script_sentence_component[i][j] and voice_sentence_component[i][j]:
-                        if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
-                            print ("False")
-                            return False
-                 else :
-                     return False
-
-             return True
+    return True
 
 def change_active_passive(script_sentence_component, voice_sentence_component):
     # script : 능동 / voice : 피동
@@ -212,10 +266,10 @@ def change_active_passive(script_sentence_component, voice_sentence_component):
             object_equal_subject = True
 
         for i in range(0, len(script_sentence_component[2])):  # script의 본 동사 찾기
-            if (script_sentence_component[2][i][1].find("VV") != -1):
+            if script_sentence_component[2][i][1].find("VV") != -1:
                 script_verb = script_sentence_component[2][i][0]
         for i in range(0, len(voice_sentence_component[2])):  # voice의 본 동사 찾기
-            if (voice_sentence_component[2][i][1].find("VV") != -1):
+            if voice_sentence_component[2][i][1].find("VV") != -1:
                 voice_verb = voice_sentence_component[2][i][0]
 
         if script_verb.find(voice_verb) != -1 or voice_verb.find(
@@ -246,9 +300,12 @@ def change_active_passive(script_sentence_component, voice_sentence_component):
             if voice_sentence_component[2][i][1].find("VV") != -1:
                 voice_verb = voice_sentence_component[2][i][0]
 
-        if script_verb.find(voice_verb) != -1 or voice_verb.find(
-                script_verb) != -1:  # script의 본동사와 voice의 본동사가 일치하는 부분이 있으면 true
-            verb_equal = True
+        try:
+            # script의 본동사와 voice의 본동사가 일치하는 부분이 있으면 true
+            if script_verb.find(voice_verb) != -1 or voice_verb.find(script_verb) != -1:
+                verb_equal = True
+        except:
+            return False
 
         if subject_equal_object == True or adverb_equal_subject == True or verb_equal == True:
             return True
@@ -337,7 +394,7 @@ def sentence_without_part(input_string, string_table):
                 index += len(string_table[i][j][0]) #해당 문자까지 출력할 것이므로 그 문자의 길이만큼 index 증가
                 if index < len(input_string):   #만약 마지막 요소가 아니라면
                     if input_string[index] == '.' or input_string[index] == ',':    #다음 요소가 .이나 ,일 때
-                        index += 1; #해당 문자도 포함하기 위해 index 1 증가
+                        index += 1 #해당 문자도 포함하기 위해 index 1 증가
                 sentence=input_string[:index]  #처음부터 끝까지 문장 저장
                 input_string=input_string[index:]   #저장한 문장은 제외
                 break
