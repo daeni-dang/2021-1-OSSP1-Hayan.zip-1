@@ -67,8 +67,6 @@ def main(request):
             #print(sentence_without_part2(text))
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
-            if str[len(str)-2] == "니" and str[len(str)-1] == "다": # ~니다 꼴이면 끝에 . 추가
-                str += '.'
 
             voice_sentence = sentence_without_part2(str)
             for i in range(len(voice_sentence)):
@@ -138,10 +136,23 @@ def change_taxis_compare(script_sentence_component, voice_sentence_component):
     for i in range(0, 7):
         if len(script_sentence_component[i]) != len(voice_sentence_component[i]):
             return False
-        for j in range(0, len(script_sentence_component[i])):
-            if voice_sentence_component[i]:
-                if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
+        if i==6:
+            isHaveSame = False
+            for j in range(0, len(script_sentence_component[i])):
+                for k in range(0, len(voice_sentence_component[i])):
+                    if script_sentence_component[i] and voice_sentence_component[i]:
+                        if script_sentence_component[i][j][0] == voice_sentence_component[i][k][0]:
+                            isHaveSame = True
+                            break
+                if not isHaveSame:
                     return False
+                else:
+                    isHaveSame = False
+        else:
+            for j in range(0, len(script_sentence_component[i])):
+                if voice_sentence_component[i]:
+                    if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
+                        return False
 
     return True
 
