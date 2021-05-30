@@ -74,15 +74,13 @@ def main(request):
                 q.put(voice_sentence[i])
 
             one_sentence = ''
-            sentence_length = 0
             for i in range(q.qsize()):
                 one_sentence += q.get() + ' '
                 one_sentence = remove_marks(one_sentence)
                 mecab_result = mecab.pos(one_sentence)
                 if is_sentence_End(mecab_result[len(mecab_result) - 1]):
-                    while len(one_sentence) != sentence_length:
+                    while len(one_sentence) != 0:
                         flag = False
-                        sentence_length = len(one_sentence)
                         voice_table = sentence_division(one_sentence)
                         #print(voice_table)
                         #print(mecab_result)
@@ -104,9 +102,12 @@ def main(request):
                                     lastTrueIndex = i
                                     script_index = i+1
                                 break
-                        if flag is False:
+                        if flag:
+                            break
+                        else:
                             index = one_sentence.find(' ')
                             one_sentence = one_sentence[index+1:]
+
                     one_sentence = ''
             if not (one_sentence.isspace() or one_sentence == ''):
                 q.put(one_sentence)
