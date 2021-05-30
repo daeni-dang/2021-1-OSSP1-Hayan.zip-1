@@ -53,51 +53,60 @@ def main(request):
             voice_table = []
             element_table = []
             modifier_table = []
+            while not q.empty(): q.get()
 
             text = request.POST['inputStr']
             element_table = np.empty((0, 9), dtype=list)
             script_table = sentence_division(text) #형태소 포함된 배열
-            script_string_array = sentence_without_part2(text) #형태소 없는 배열
+            script_string_array = sentence_without_part(text) #형태소 없는 배열
             each_sentence_division(script_string_array) # 문장 단위로 끊어진 배열로 문장 분석
             script_index = 0
             trueSentenceIndex = []
             lastTrueIndex = -1
             yellowSentenceIndex = []
             falseSentenceIndex = []
-            #print(sentence_without_part2(text))
+            #print(sentence_without_part(text))
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
             str = add_period(str)
-            voice_sentence = sentence_without_part2(str)
+            voice_sentence = sentence_without_part(str)
             for i in range(len(voice_sentence)):
                 q.put(voice_sentence[i])
 
             one_sentence = ''
+            sentence_length = 0
             for i in range(q.qsize()):
                 one_sentence += q.get() + ' '
                 one_sentence = remove_marks(one_sentence)
                 mecab_result = mecab.pos(one_sentence)
                 if is_sentence_End(mecab_result[len(mecab_result) - 1]):
-                    voice_table = sentence_division(one_sentence)
-                    print(voice_table)
-                    print(mecab_result)
-                    index_arr = [0, 1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6]
-                    index_arr = [script_index + x for x in index_arr]
-                    for i in index_arr:  # 앞 뒤 여섯 문장까지 검사
-                        if i < 0:  # 범위 벗어날 때 처리
-                            continue
-                        if i >= len(script_table):  # 범위 벗어날 때 처리
-                            continue
-                        if i in trueSentenceIndex or i in yellowSentenceIndex:  # 이미 말한 문장에 있으면 다음 문장 검사
-                            continue
-                        if super_compare(i, voice_table[0], one_sentence):  # 맞는 문장 찾았다면 그만 검사
-                            if lastTrueIndex > i:
-                                yellowSentenceIndex.append(i)
-                            else:
-                                trueSentenceIndex.append(i)
-                                lastTrueIndex = i
-                                script_index = i+1
-                            break
+                    while len(one_sentence) != sentence_length:
+                        flag = False
+                        sentence_length = len(one_sentence)
+                        voice_table = sentence_division(one_sentence)
+                        #print(voice_table)
+                        #print(mecab_result)
+                        index_arr = [0, 1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6]
+                        index_arr = [script_index + x for x in index_arr]
+                        for i in index_arr:  # 앞 뒤 여섯 문장까지 검사
+                            if i < 0:  # 범위 벗어날 때 처리
+                                continue
+                            if i >= len(script_table):  # 범위 벗어날 때 처리
+                                continue
+                            if i in trueSentenceIndex or i in yellowSentenceIndex:  # 이미 말한 문장에 있으면 다음 문장 검사
+                                continue
+                            if super_compare(i, voice_table[0], one_sentence):  # 맞는 문장 찾았다면 그만 검사
+                                flag = True
+                                if lastTrueIndex > i:
+                                    yellowSentenceIndex.append(i)
+                                else:
+                                    trueSentenceIndex.append(i)
+                                    lastTrueIndex = i
+                                    script_index = i+1
+                                break
+                        if flag is False:
+                            index = one_sentence.find(' ')
+                            one_sentence = one_sentence[index+1:]
                     one_sentence = ''
             if not (one_sentence.isspace() or one_sentence == ''):
                 q.put(one_sentence)
@@ -140,7 +149,9 @@ def simple_compare(script_sentence, voice_sentence):
         return False
     for i in range(0,len(script_sentence)):
         if script_sentence[i][0] != voice_sentence[i][0]:
-            return False
+            if (not (script_sentence[i][0] == '의' or script_sentence[i][0] == '에')  # 추가
+                    and (voice_sentence[i][0] == '의' or voice_sentence[i][0] == '에')):
+                return False
     return True
 
 # 문장 단순히 순서만 바뀌었을 때 일치 판정 함수
@@ -343,7 +354,7 @@ def is_have_tag(what_find, token):
     else:
         return False
 
-def sentence_without_part2(text):   #연결어미로 끝나지 않을 때 포함하여 원본 반환
+def sentence_without_part(text):   #연결어미로 끝나지 않을 때 포함하여 원본 반환
     mecab = Mecab()
     sentences = []
     mecab_text = mecab.pos(text)
@@ -361,24 +372,6 @@ def sentence_without_part2(text):   #연결어미로 끝나지 않을 때 포함
 
     if not (text.isspace()) and text != '':
         sentences.append(text)
-    return sentences
-
-def sentence_without_part(input_string, string_table):
-    #형태소 구분 없이 문자열로만 string 문장 구분
-    sentences=[]    #구분된 문장들 담을 배열
-    for i in range(0,len(string_table)):
-        sentence = ''   #한 문장 저장할 문자열
-        for j in range(0, len(string_table[i])):
-            if is_sentence_End(string_table[i][j]) :    #문장의 끝이라면
-                index = input_string.find(string_table[i][j][0]) #문장의 끝 요소 index 찾음
-                index += len(string_table[i][j][0]) #해당 문자까지 출력할 것이므로 그 문자의 길이만큼 index 증가
-                if index < len(input_string):   #만약 마지막 요소가 아니라면
-                    if input_string[index] == '.' or input_string[index] == ',':    #다음 요소가 .이나 ,일 때
-                        index += 1 #해당 문자도 포함하기 위해 index 1 증가
-                sentence=input_string[:index]  #처음부터 끝까지 문장 저장
-                input_string=input_string[index:]   #저장한 문장은 제외
-                break
-        sentences.append(sentence)  #문장 추가
     return sentences
 
 def remove_marks(string): # 특수문자 제거 함수
@@ -432,11 +425,6 @@ def sentence_division(input_string):
                 sentence.append(mecab_result[j])  # 각 요소를 현재 문장에 추가
             string_table.append(sentence)  # 완성된 한 문장을 테이블에 추가
 
-            #아래로는 each_sentence_division에서 해주는 작업이라서 주석처리 (음성인식이 대본 element_table 간섭 못하게 한 것)
-            # origin_string_table = sentence_without_part(input_string, string_table)  # 형태소 분석이 안 된 origin 문장을 찾아서 저장(관형어 찾는 함수에서 사용하기 위해)
-            # one_line_temp = make_element_table(sentence, origin_string_table[cnt])
-            # element_table = np.append(element_table, np.array([one_line_temp], dtype=list), axis=0)  # element_table 행 추가
-            # modifier_table.append(make_modifier_table(origin_string_table[cnt], sentence))  # modifier_table 행 추가
             cnt += 1
             string_start = i + 1  # 다음 문장의 첫 번째 요소를 가리킴.
 
