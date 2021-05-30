@@ -32,6 +32,7 @@
                             {% endfor %}
                         </div>
                         <input class="btn" type="button" value="원본 보기" onclick="show_result()">
+                        <a id="percent"></a>
                     </div>
 
                 </div>
@@ -132,10 +133,16 @@
 
             }
             function show_result(){
-                white_sentences = document.querySelectorAll('.white-text');
+                var white_sentences = document.querySelectorAll('.white-text');
+                var green_sentences = document.querySelectorAll('.green-text');
+                var yellow_sentences = document.querySelectorAll('.yellow-text');
+                var all = white_sentences.length+green_sentences.length+yellow_sentences.length;
+                var avg = (green_sentences.length+(yellow_sentences.length*0.5))/all*100;
+
                 for(var i of white_sentences){
                     i.className='red-text';
                 }
+                document.querySelector('#percent').innerHTML = "정확도: "+avg+"%";
             }
 
             // checkbox 누를 때마다 대본 보이게 하고 안 보이게 하는 함수

@@ -35,6 +35,10 @@ body{
 
 }
 
+#resultStr{
+    overflow: scroll;
+}
+
 .btn{
     font-family: "나눔스퀘어_ac ExtraBold";
     padding: 10px;
