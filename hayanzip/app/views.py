@@ -713,11 +713,11 @@ def find_tense(sentence):
     is_present_flag = True  # 현재시제 판단 위한 변수
     for i in range(len(sentence)):
         # 미래시제 1: '것''이'
-        if sentence[i][1].find('NNB') != -1:
-            do_jamo = j2hcj(h2j(sentence[i - 1][0])) # jamo를 이용해 분리(할->ㅎㅏㄹ)
-            if do_jamo[2] == 'ㄹ': # -ㄹ 것이 가 미래형으로 구분
+        if sentence[i][1].find('NNB') != -1 and sentence[i][0].find('것') != -1:
+            do_jamo = j2hcj(h2j(sentence[i - 1][0]))  # jamo를 이용해 분리(할->ㅎㅏㄹ)
+            if len(do_jamo) > 2 and do_jamo[2] == 'ㄹ':  # 종성이 있고, -ㄹ 것이 가 미래형으로 구분
                 special_future = special_future + 1  # NNB 는 '것'이므로 ++함
-        if sentence[i][1].find('VCP') != -1:
+        if sentence[i][1].find('VCP') != -1 and sentence[i][0].find('이') != -1:
             special_future = special_future + 1  # VCP 는 '이'이므로 ++함
         if special_future == 2:  # '것'과 '이'가 모두 존재하면 미래 시제로 판단
             tense_table[2].append(sentence)
