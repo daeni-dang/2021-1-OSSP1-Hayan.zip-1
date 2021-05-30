@@ -135,6 +135,7 @@ def super_compare(script_index, voice_sentence, one_sentence):
 
     return False
 
+# 문장 단순 비교 함수
 def simple_compare(script_sentence, voice_sentence):
     if len(script_sentence) != len(voice_sentence):
         return False
@@ -143,6 +144,7 @@ def simple_compare(script_sentence, voice_sentence):
             return False
     return True
 
+# 문장 단순히 순서만 바뀌었을 때 일치 판정 함수
 def change_taxis_compare(script_sentence_component, voice_sentence_component):
     for i in range(0, 7):
         if len(script_sentence_component[i]) != len(voice_sentence_component[i]):
@@ -164,10 +166,10 @@ def change_taxis_compare(script_sentence_component, voice_sentence_component):
                 if voice_sentence_component[i]:
                     if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
                         return False
-
     return True
 
-def subject_compare(script_sentence, voice_sentence):       # 주어 일치 확인
+# 주어 일치 확인
+def subject_compare(script_sentence, voice_sentence):
     if script_sentence[0]:
         if voice_sentence[0]:
             if find_N(script_sentence[0]) == find_N(voice_sentence[0]): return True
@@ -177,7 +179,8 @@ def subject_compare(script_sentence, voice_sentence):       # 주어 일치 확�
         if voice_sentence[0]: return False
         else: return True
 
-def object_compare(script_sentence, voice_sentence):        # 목적어 일치 확인
+# 목적어 일치 확인
+def object_compare(script_sentence, voice_sentence):
     if script_sentence[1]:
         if voice_sentence[1]:
             if find_N(script_sentence[1]) == find_N(voice_sentence[1]): return True
@@ -187,7 +190,8 @@ def object_compare(script_sentence, voice_sentence):        # 목적어 일치 �
         if voice_sentence[1]: return False
         else: return True
 
-def predicate_compare(script_sentence, voice_sentence):        # 본동사 일치 확인
+# 본동사 일치 확인
+def predicate_compare(script_sentence, voice_sentence):
     if script_sentence[2]:
         if voice_sentence[2]:
             for s_index in range(len(script_sentence[2])):
@@ -204,6 +208,7 @@ def predicate_compare(script_sentence, voice_sentence):        # 본동사 일�
         else: return True
     return False
 
+# 주어진 문장성분에서 조사를 제외하고 반환
 def find_N(block):
     s = []
     for i in range(len(block)):
@@ -224,8 +229,8 @@ def flag_true_compare(script_sentence_component, voice_sentence_component):
     else:
         return False
 
-
-def j_compare(script_sentence_component, voice_sentence_component):  # 조사가 바뀌었을 때 일치 판정 함수
+# 조사가 바뀌었을 때 일치 판정 함수
+def j_compare(script_sentence_component, voice_sentence_component):
     for q in range(0, 2):
         if len(voice_sentence_component[q]) == len(script_sentence_component[q]):
             for k in range(0, len(voice_sentence_component[q])):
@@ -235,7 +240,6 @@ def j_compare(script_sentence_component, voice_sentence_component):  # 조사가
                     continue
                 else:
                     if script_sentence_component[q][k][0] != voice_sentence_component[q][k][0]:
-                        print("False")
                         return False
         else:
             return False
@@ -244,43 +248,14 @@ def j_compare(script_sentence_component, voice_sentence_component):  # 조사가
             for j in range(0, len(voice_sentence_component[i])):
                 if script_sentence_component[i][j] and voice_sentence_component[i][j]:
                     if script_sentence_component[i][j][0] != voice_sentence_component[i][j][0]:
-                        print("False")
                         return False
         else:
             return False
 
     return True
 
+# 능동, 피동 바뀌었을 때 일치 판정 함수
 def change_active_passive(script_sentence_component, voice_sentence_component):
-    # script : 능동 / voice : 피동
-    subject_equal_adverb = False  # script 주어와 voice 부사어 같은가
-    object_equal_subject = False  # script 목적어와 voice 주어 같은가
-    verb_equal = False  # 본동사 일치하는가
-
-    if script_sentence_component[0] and voice_sentence_component[4] and script_sentence_component[1] and voice_sentence_component[0] \
-            and script_sentence_component[2] and voice_sentence_component[2]:
-
-        for i in range(0, len(voice_sentence_component[4])):  # script의 주어가 voice 부사어에 있나 확인
-            if (script_sentence_component[0][0][0] == voice_sentence_component[4][i][0]):
-                subject_equal_adverb = True
-
-        if script_sentence_component[1][0][0] == voice_sentence_component[0][0][0]:  # script 목적어와 voice 주어가 같나 확인
-            object_equal_subject = True
-
-        for i in range(0, len(script_sentence_component[2])):  # script의 본 동사 찾기
-            if script_sentence_component[2][i][1].find("VV") != -1:
-                script_verb = script_sentence_component[2][i][0]
-        for i in range(0, len(voice_sentence_component[2])):  # voice의 본 동사 찾기
-            if voice_sentence_component[2][i][1].find("VV") != -1:
-                voice_verb = voice_sentence_component[2][i][0]
-
-        if script_verb.find(voice_verb) != -1 or voice_verb.find(
-                script_verb) != -1:  # script의 본동사와 voice의 본동사가 일치하는 부분이 있으면 true
-            verb_equal = True
-
-        if subject_equal_adverb == True and object_equal_subject == True and verb_equal == True:
-            return True
-
     # script : 피동 / voice : 능동
     subject_equal_object = False  # script 주어와 voice 목적어가 같은가
     adverb_equal_subject = False  # script 부사어와 voice 주어가 같은가
@@ -326,7 +301,6 @@ def add_period(input_string): # 음성인식된 문장의 '좋아합니다' 뒤�
     if index != -1:
         index += 5
         result = input_string[:index] + '.' + input_string[index:]
-    print(result)
     return result
 
 def is_sentence_End(last_token):  # 문장의 마지막인지 판단 : EF[종결어미] 이거나 EC(연결어미)로 분석된 마지막 요소
@@ -696,6 +670,7 @@ def find_adverb(input_string):
 def find_complement(input_string):  # ('되다'의 경우 현재 보격 조사 판별 X)
     temp_string = input_string
     complementArr = []
+    N_cnt = 0
     for i in range(len(temp_string)):
         if temp_string[i][1].find('JKC') != -1:  # 형태소 분석을 한 결과에서 보격 조사를 찾음
             for j in range(0, i): # 문장 처음부터 보격 조사 까지
