@@ -135,6 +135,8 @@ def super_compare(script_index, voice_sentence, one_sentence):
         return False
     if not predicate_compare(element_table[script_index], voice_sentence_component):
         return False
+    if not adnominal_noun_compare(script_index, one_sentence, voice_sentence):
+        return False
     if not flag_true_compare(element_table[script_index], voice_sentence_component):
          return False
     if j_compare(element_table[script_index], voice_sentence_component):
@@ -150,7 +152,7 @@ def simple_compare(script_sentence, voice_sentence):
         return False
     for i in range(0,len(script_sentence)):
         if script_sentence[i][0] != voice_sentence[i][0]:
-            if (not (script_sentence[i][0] == '의' or script_sentence[i][0] == '에')  # 추가
+            if not( (script_sentence[i][0] == '의' or script_sentence[i][0] == '에')  # 추가
                     and (voice_sentence[i][0] == '의' or voice_sentence[i][0] == '에')):
                 return False
     return True
@@ -232,6 +234,28 @@ def find_N(block):
         else: s.append(block[i])
         return s
 
+# 관형어+명사 비교
+def adnominal_noun_compare(script_index, one_sentence, voice_sentence):
+    script_modifier_table = modifier_table[script_index]
+    voice_modifier_table = make_modifier_table(one_sentence, voice_sentence)
+
+    if len(script_modifier_table) > len(voice_modifier_table):
+        return False
+    adnominal_flag = True
+    found_noun = False
+    for i in range(len(script_modifier_table)):
+        for j in range(len(voice_modifier_table)):
+            # 같은 명사 찾았을 때 앞의 수식어 비교
+            if script_modifier_table[i][len(script_modifier_table[i])-1] == voice_modifier_table[j][len(voice_modifier_table[j])-1]:
+                found_noun = True                   # 같은 명사 있음
+                if script_modifier_table[i] != voice_modifier_table[j]:
+                    adnominal_flag = False          # 같은 명사의 수식어가  틀림
+        if not found_noun:                          # 같은 명사 못 찾았을 시 False
+            return False
+    if adnominal_flag: return True                  # 같은 명사의 수식어가 같으면 True
+    else: return False                              # 같은 명사의 수식어가 다르면 False
+    return False
+
 # 시제와 부정 표현이 모두 일치하는지 확인하는 함수
 def flag_true_compare(script_sentence_component, voice_sentence_component):
     # 7: 시제가 맞는지 확인
@@ -269,20 +293,47 @@ def j_compare(script_sentence_component, voice_sentence_component):
 
 # 능동, 피동 바뀌었을 때 일치 판정 함수
 def change_active_passive(script_sentence_component, voice_sentence_component):
+    # script : 능동 / voice : 피동
+    subject_equal_adverb = False  # script 주어와 voice 부사어 같은가
+    object_equal_subject = False  # script 목적어와 voice 주어 같은가
+    verb_equal = False  # 본동사 일치하는가
+    if script_sentence_component[0] and voice_sentence_component[4] and script_sentence_component[1] and \
+            voice_sentence_component[0] \
+            and script_sentence_component[2] and voice_sentence_component[2]:
+        for i in range(0, len(voice_sentence_component[4])):  # script의 주어가 voice 부사어에 있나 확인
+            if (script_sentence_component[0][0][0] == voice_sentence_component[4][i][0]):
+                subject_equal_adverb = True
+        if script_sentence_component[1][0][0] == voice_sentence_component[0][0][0]:  # script 목적어와 voice 주어가 같나 확인
+            object_equal_subject = True
+
+        for i in range(0, len(script_sentence_component[2])):  # script의 본 동사 찾기
+            if script_sentence_component[2][i][1].find("VV") != -1:
+                script_verb = script_sentence_component[2][i][0]
+        for i in range(0, len(voice_sentence_component[2])):  # voice의 본 동사 찾기
+            if voice_sentence_component[2][i][1].find("VV") != -1:
+                voice_verb = voice_sentence_component[2][i][0]
+
+        try:
+            # script의 본동사와 voice의 본동사가 일치하는 부분이 있으면 true
+            if script_verb.find(voice_verb) != -1 or voice_verb.find(script_verb) != -1:
+                verb_equal = True
+        except:
+            return False
+
+        if subject_equal_adverb == True and object_equal_subject == True and verb_equal == True:
+            return True
     # script : 피동 / voice : 능동
     subject_equal_object = False  # script 주어와 voice 목적어가 같은가
     adverb_equal_subject = False  # script 부사어와 voice 주어가 같은가
     verb_equal = False  # 본동사 일치하는가
-    if script_sentence_component[0] and voice_sentence_component[1] and script_sentence_component[4] and voice_sentence_component[0] \
+    if script_sentence_component[0] and voice_sentence_component[1] and script_sentence_component[4] and \
+            voice_sentence_component[0] \
             and script_sentence_component[2] and voice_sentence_component[2]:
-
         if script_sentence_component[0][0][0] == voice_sentence_component[1][0][0]:  # script 주어와 voice 목적어가 같은가
             subject_equal_object = True
-
         for i in range(0, len(script_sentence_component[4])):
             if script_sentence_component[4][i][0] == voice_sentence_component[0][0][0]:  # script 부사어와 voice 주어가 같은가
                 adverb_equal_subject = True
-
         for i in range(0, len(script_sentence_component[2])):  # script의 본 동사 찾기
             if script_sentence_component[2][i][1].find("VV") != -1:
                 script_verb = script_sentence_component[2][i][0]
@@ -299,7 +350,6 @@ def change_active_passive(script_sentence_component, voice_sentence_component):
 
         if subject_equal_object == True or adverb_equal_subject == True or verb_equal == True:
             return True
-
     return False
 
 def add_space_after_mot(input_string):  # '못' 뒤에 띄어쓰기 추가하는 함수 : '못'을 기준으로 split한 후, 각 요소 사이에 '못+공백'을 추가하여 합침.
