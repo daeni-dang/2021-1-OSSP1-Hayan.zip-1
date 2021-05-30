@@ -67,7 +67,6 @@ def main(request):
             #print(sentence_without_part2(text))
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
-            # '좋아합니다' 꼴 처리 함수
             str = add_period(str)
             voice_sentence = sentence_without_part2(str)
             for i in range(len(voice_sentence)):
@@ -194,6 +193,8 @@ def object_compare(script_sentence, voice_sentence):
 def predicate_compare(script_sentence, voice_sentence):
     if script_sentence[2]:
         if voice_sentence[2]:
+            s_index = 0
+            v_index = 0
             for s_index in range(len(script_sentence[2])):
                 if script_sentence[2][s_index][1].find('VV') != -1:
                     break
@@ -296,6 +297,9 @@ def add_space_after_mot(input_string):  # '못' 뒤에 띄어쓰기 추가하는
     return string
 
 def add_period(input_string): # 음성인식된 문장의 '좋아합니다' 뒤에 . 추가
+    # '좋아합니다' 뒤에 문장이 오거나, '.' 이 있을 때는 좋+아+합니다 로 형태소 분석
+    # '좋아합니다' 뒤에 문장x, '.'x 일 때는 좋아합니다 로 형태소 분석
+    # 위 경우를 하나로 통일시키기 위한 함수
     index = input_string.find('좋아합니다')
     result = input_string
     if index != -1:
