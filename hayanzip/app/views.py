@@ -498,34 +498,41 @@ def make_modifier_table(input_string, mecab_string):
     temp_modifier = []
 
     for i in range(len(temp_string)):
-        modifier_line = [[], [], []]
-        modifier_line_two = [[], []]
+        modifier_line = [[], [], []]  # 관형형 전성 어미가 2개로 끊기는 경우(ex. 깨끗 + 한 + ~)
+        modifier_line_two = [[], []]  # 관형형 전성 어미가 1개로 끊기는 경우(ex. 아름다운 + ~)
         if temp_string[i][1].find('ETM') != -1:  # 관형형 전성어미를 통해 관형어를 찾음
             if temp_string[i][1].find('+') != -1:  # 관형형 전성어미가 다른 형태소에 포함되어 나오는 경우(ex.('못생긴', 'VA+ETM'))
                 inputIndex = input_string.find(temp_string[i][0])
-                if temp_string[i - 1] == temp_string[len(temp_string) - 1]:  # 여러 개의 관형형 전성어미가 나올 경우 띄어쓰기로 각각을 구분하기 때문에 맨 앞의 관형형 전성어미에 대한 예외처리
-                    modifier_line_two[0].extend(temp_string[i])
-                    modifier_line_two[1].extend(temp_string[i + 1])
-                    temp_modifier.append(modifier_line_two)
+                if temp_string[i - 1] == temp_string[
+                    len(temp_string) - 1]:  # 여러 개의 관형형 전성어미가 나올 경우 띄어쓰기로 각각을 구분하기 때문에 맨 앞의 관형형 전성어미에 대한 예외처리
+                    if temp_string[i] != temp_string[len(temp_string) - 1]:  # 만약 관형형 전성어미 뒤에서 문장이 잘린 경우 테이블에 넣으면 안됨
+                        modifier_line_two[0].extend(temp_string[i])
+                        modifier_line_two[1].extend(temp_string[i + 1])
+                        temp_modifier.append(modifier_line_two)
 
-                elif input_string[inputIndex - 1] != ' ':  # 관형형 전성어미가 다른 형태소와 합성되어 있으며 그 앞에 다른 형태소가 나오는 경우 관형형 전성어미의 앞의 단어도 list에 추가(ex.('깨끗', 'XR'), ('한', 'XSA+ETM'))
+                elif input_string[
+                    inputIndex - 1] != ' ':  # 관형형 전성어미가 다른 형태소와 합성되어 있으며 그 앞에 다른 형태소가 나오는 경우 관형형 전성어미의 앞의 단어도 list에 추가(ex.('깨끗', 'XR'), ('한', 'XSA+ETM'))
+                    if temp_string[i] != temp_string[len(temp_string) - 1]:  # 만약 관형형 전성어미 뒤에서 문장이 잘린 경우 테이블에 넣으면 안됨
+                        modifier_line[0].extend(temp_string[i - 1])
+                        modifier_line[1].extend(temp_string[i])
+                        modifier_line[2].extend(temp_string[i + 1])
+                        temp_modifier.append(modifier_line)
+
+                else:  # 관형형 전성어미가 붙어서 한번에 나오는 경우 그 단어만 관형어 list에 추가(ex.('아름다운', 'VA+ETM'))
+                    if temp_string[i] != temp_string[len(temp_string) - 1]:  # 만약 관형형 전성어미 뒤에서 문장이 잘린 경우 테이블에 넣으면 안됨
+                        modifier_line_two[0].extend(temp_string[i])
+                        modifier_line_two[1].extend(temp_string[i + 1])
+                        temp_modifier.append(modifier_line_two)
+
+            else:  # 관형형 전성어미가 다른 형태소에 포함되지 않고 나오는 경우(ex.('작', 'VA'), ('은', 'ETM'))
+                if temp_string[i] != temp_string[len(temp_string) - 1]:  # 만약 관형형 전성어미 뒤에서 문장이 잘린 경우 테이블에 넣으면 안됨
                     modifier_line[0].extend(temp_string[i - 1])
                     modifier_line[1].extend(temp_string[i])
                     modifier_line[2].extend(temp_string[i + 1])
                     temp_modifier.append(modifier_line)
 
-                else:  # 관형형 전성어미가 붙어서 한번에 나오는 경우 그 단어만 관형어 list에 추가(ex.('아름다운', 'VA+ETM'))
-                    modifier_line_two[0].extend(temp_string[i])
-                    modifier_line_two[1].extend(temp_string[i + 1])
-                    temp_modifier.append(modifier_line_two)
+    return temp_modifier  # 한 문장에 대한 테이블 한 행을 반환
 
-            else:  # 관형형 전성어미가 다른 형태소에 포함되지 않고 나오는 경우(ex.('작', 'VA'), ('은', 'ETM'))
-                modifier_line[0].extend(temp_string[i - 1])
-                modifier_line[1].extend(temp_string[i])
-                modifier_line[2].extend(temp_string[i + 1])
-                temp_modifier.append(modifier_line)
-
-    return temp_modifier
 
 # 주어 찾는 함수
 def find_s(sentence):
