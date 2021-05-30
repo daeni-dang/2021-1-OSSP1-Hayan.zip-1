@@ -43,6 +43,12 @@ body{
     margin-top: 10px;
 }
 
+.checkbox {
+    margin: 5px;
+    padding: 5px;
+    font-family: "나눔스퀘어_ac ExtraBold";
+}
+
 .text{
     width: 95%;
     height: 100%;

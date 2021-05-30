@@ -14,6 +14,10 @@
                 <span id="finalStr"></span>
                 <span id="interim"></span>
             </div>
+            <div class="checkbox">
+                <label><b>대본 ON/OFF</b></label>
+                <input type="checkbox" id="check" checked>
+            </div>
             <form id="input" method="post">
                 <div id="main">
                     <div id="left">
@@ -133,6 +137,20 @@
                     i.className='red-text';
                 }
             }
+
+            // checkbox 누를 때마다 대본 보이게 하고 안 보이게 하는 함수
+            $(function(){
+                $('#check').on('change', function(){
+                    var isChk = this.checked;
+                    if(isChk){
+                        $('#inputStr').show();
+                    }
+                    else {
+                        $('#inputStr').hide();
+                    }
+                })
+            })
+
             initRecognition();
         </script>
     </body>
