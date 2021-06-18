@@ -96,6 +96,7 @@ def main(request):
                             if super_compare(i, voice_table[0], one_sentence):  # 맞는 문장 찾았다면 그만 검사
                                 flag = True
                                 if lastTrueIndex > i:
+                                    lastTrueIndex = i
                                     yellowSentenceIndex.append(i)
                                 else:
                                     trueSentenceIndex.append(i)
