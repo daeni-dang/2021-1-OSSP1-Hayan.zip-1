@@ -65,7 +65,6 @@ def main(request):
             lastTrueIndex = -1
             yellowSentenceIndex = []
             falseSentenceIndex = []
-            #print(sentence_without_part(text))
             return render(request, 'app/main.html', {'text': text, 'script_string_array': script_string_array})
         else:
             str = add_period(str)
@@ -82,8 +81,7 @@ def main(request):
                     while len(one_sentence) != 0:
                         flag = False
                         voice_table = sentence_division(one_sentence)
-                        #print(voice_table)
-                        #print(mecab_result)
+
                         index_arr = [0, 1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6]
                         index_arr = [script_index + x for x in index_arr]
                         for i in index_arr:  # 앞 뒤 여섯 문장까지 검사
@@ -96,7 +94,7 @@ def main(request):
                             if super_compare(i, voice_table[0], one_sentence):  # 맞는 문장 찾았다면 그만 검사
                                 flag = True
                                 if lastTrueIndex > i:
-                                    lastTrueIndex = i
+                                    script_index = i+1
                                     yellowSentenceIndex.append(i)
                                 else:
                                     trueSentenceIndex.append(i)
@@ -479,28 +477,10 @@ def sentence_division(input_string):
 
             cnt += 1
             string_start = i + 1  # 다음 문장의 첫 번째 요소를 가리킴.
-
-    # element_table에 잘 들어갔는지 확인하기 위해 출력하는 코드
-    # print("=================================")
-    # for i in range(len(element_table)):
-    #     for j in range(len(element_table[i])):
-    #         print(element_table[i][j], end='  ')
-    #     print()
-    # print("=================================")
-
-    # modifier_table에 잘 들어갔는지 확인하기 위해 출력하는 코드
-    # print("=================================")
-    # for i in range(len(modifier_table)):
-    #     for j in range(len(modifier_table[i])):
-    #         print(modifier_table[i][j], end='  ')
-    #     print()
-    # print("=================================")
-
     return string_table
 
     # sentence_division 함수를 한번 실행하면 total_table 완성! total_table은 global 변수 이므로 함수 실행 후 사용하면 됨!
     # 문제! : 다은이 -> 다(MAG) + 은이(NNG) : MAG 삭제
-
 
 # 대본에 대해 문장별로 요소들을 정리하여 total_table에 담는 함수
 # | 주어 | 목적어 | 서술어 | 관형어 | 부사어 | 보어 | 아무것도 아닌거 | 시제 flag | 부정의 의미인지 아닌지 flag |
