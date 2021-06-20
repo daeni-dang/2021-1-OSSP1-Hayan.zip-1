@@ -3,7 +3,7 @@
 
 +암기 보조 프로그램+
 
----------------------
+----------------------------
 ### 팀원
   + 김가은 
   + 김건우 
@@ -11,11 +11,21 @@
   + 변은서 
   + 이시은 
   + 이태규 
-----------------------
 
+----------------------------
+### licenses:
+- sources: LICENSE_APACHE</br>
+   key: apache-2.0</br>
+- sources: LICENSE_GNU</br>
+   key: gpl-3.0</br>
+
+----------------------------
 ### 소개
 발표나 면접을 위한 암기를 보조하는 프로그램이다.
 사용자에게 대본을 입력받은 후 음성인식을 진행한다. 대본과 음성을 특정 조건에 맞추어 비교하여 일치여부 판단하는 프로그램이다.
+
+It is a program that aids memorization for presentations or interviews.
+After receiving scripts from users, voice recognition is carried out. It is a program that compares scripts and voices to specific conditions to determine whether they match.
 
 ### 개발동기
 대부분의 사람들이 필연적으로 발표를 진행하게 되는 상황에 맞닥뜨리게 된다. 
@@ -28,7 +38,7 @@ However, in most interviews and presentations, it is often difficult to proceed 
 Also, it is effective to read the script and present it with nonverbal expressions.
 In order to help many people who have difficulty memorizing scripts in these situations, the following "memorization assistance" was devised.
 
-----------------------
+----------------------------
 ### 개발 환경
 <p>
   <img src = "https://shields.io/badge/logo-python-blue?logo=python">
@@ -47,9 +57,13 @@ In order to help many people who have difficulty memorizing scripts in these sit
 ### 패키지 설치
     >> pip install eunjeon
     >> pip install django
-    
+    >> pip install jamo
+
 ----------------------------
 ### 사용 방법
+![image](https://user-images.githubusercontent.com/80972215/122677606-00405500-d21e-11eb-9f1e-0814a7026367.png)
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[프로그램 화면]
 1. 대본을 왼쪽 텍스트 박스에 넣는다.
 2. <분석하기> 버튼을 누른다.
 3. <암기시작>버튼을 누르고, 대본을 암기한다.
@@ -64,19 +78,15 @@ In order to help many people who have difficulty memorizing scripts in these sit
 5. After memorizing, click the <원본보기> button to compare the script with the memorized content.
 
 ----------------------------
-### 프로그램의 제약
+### 제약사항
 1. 한국어 문법상 옳은 문장을 입력한다.
-2. 발표문은 영어가 아니다.(영어가 들어가지 않는다.)
-3. 발표문은 모두 높임 표현으로 작성된다. 
+2. 영어는 입력되지 않는다.
+3. 모두 높임 표현으로 입력된다. 
 <br>
 
 1. Type the correct sentence in Korean grammar.
-2. The presentation is not English.
-3. All presentations are written in high terms.
-
-----------------------------
-### 프로그램 화면
-![image](https://user-images.githubusercontent.com/80972215/122677606-00405500-d21e-11eb-9f1e-0814a7026367.png)
+2. English is not entered.
+3. All are entered as honorific.
 
 ----------------------------
 ### 프로그램 구조도
