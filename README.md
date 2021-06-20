@@ -73,6 +73,11 @@ In order to help many people who have difficulty memorizing scripts in these sit
 1. Type the correct sentence in Korean grammar.
 2. The presentation is not English.
 3. All presentations are written in high terms.
-    
+
+----------------------------
+### 프로그램 화면
+![image](https://user-images.githubusercontent.com/80972215/122677606-00405500-d21e-11eb-9f1e-0814a7026367.png)
+
 ----------------------------
 ### 프로그램 구조도
+![image](https://user-images.githubusercontent.com/80972215/122677637-1cdc8d00-d21e-11eb-8527-787812a9fd79.png)
