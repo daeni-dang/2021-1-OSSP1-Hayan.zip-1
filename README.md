@@ -17,6 +17,17 @@
 발표나 면접을 위한 암기를 보조하는 프로그램이다.
 사용자에게 대본을 입력받은 후 음성인식을 진행한다. 대본과 음성을 특정 조건에 맞추어 비교하여 일치여부 판단하는 프로그램이다.
 
+### 개발동기
+대부분의 사람들이 필연적으로 발표를 진행하게 되는 상황에 맞닥뜨리게 된다. 
+하지만 대부분의 면접과 발표 상황 등에서는 준비한 대본이나 글을 직접 보면서 진행하기엔 어려운 경우가 많다.
+또한, 대본을 숙지한뒤 비언어적인 표현들과 함께 발표하는 것이 효과적이다. 
+이런 상황에서 대본을 암기하는데 어려움을 겪고 있는 많은 사람들에게 도움을 주고자 다음과 같은 "암기보조프로그램"을 구상하게 되었다.
+
+Most people face a situation in which they inevitably proceed with the presentation.
+However, in most interviews and presentations, it is often difficult to proceed while looking at the script or writing prepared.
+Also, it is effective to read the script and present it with nonverbal expressions.
+In order to help many people who have difficulty memorizing scripts in these situations, the following "memorization assistance" was devised.
+
 ----------------------
 ### 개발 환경
 <p>
@@ -33,6 +44,35 @@
 
 ----------------------------
 
-### 패키지_설치
+### 패키지 설치
     >> pip install eunjeon
     >> pip install django
+    
+----------------------------
+### 사용 방법
+1. 대본을 왼쪽 텍스트 박스에 넣는다.
+2. <분석하기> 버튼을 누른다.
+3. <암기시작>버튼을 누르고, 대본을 암기한다.
+4. 이때, <대본 on/off>를 통해 대본을 숨길 수 있다.
+5. 암기가 끝난 후, <원본보기>버튼을 눌러 대본과 암기한 내용을 비교한다.
+<br>
+
+1. Put the script in the left text box.
+2. Press the <분석하기> button.
+3. Press the <암기시작> button and memorize the script.
+4. At this point, you can hide the script through <대본 on/off>.
+5. After memorizing, click the <원본보기> button to compare the script with the memorized content.
+
+----------------------------
+### 프로그램의 제약
+1. 한국어 문법상 옳은 문장을 입력한다.
+2. 발표문은 영어가 아니다.(영어가 들어가지 않는다.)
+3. 발표문은 모두 높임 표현으로 작성된다. 
+<br>
+
+1. Type the correct sentence in Korean grammar.
+2. The presentation is not English.
+3. All presentations are written in high terms.
+    
+----------------------------
+### 프로그램 구조도
