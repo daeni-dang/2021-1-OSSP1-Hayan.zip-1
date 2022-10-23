@@ -1,9 +1,8 @@
 # 2021-1-OSSP1-Hayan.zip-1
 2021 공개SW Hayan.zip팀<br>
 
-+암기 보조 프로그램+
+## 암기 보조 프로그램 ##
 
-----------------------------
 ### 팀원
   + 김가은 
   + 김건우 
@@ -13,30 +12,60 @@
   + 이태규 
 
 ----------------------------
-### licenses:
+### licenses
 - sources: LICENSE_APACHE</br>
    key: apache-2.0</br>
 - sources: LICENSE_GNU</br>
    key: gpl-3.0</br>
 
 ----------------------------
-### 소개
-발표나 면접을 위한 암기를 보조하는 프로그램이다.
+### 주제 소개
+발표나 면접을 위한 **암기를 보조하는 프로그램**이다.
 사용자에게 대본을 입력받은 후 음성인식을 진행한다. 대본과 음성을 특정 조건에 맞추어 비교하여 일치여부 판단하는 프로그램이다.
 
 It is a program that aids memorization for presentations or interviews.
 After receiving scripts from users, voice recognition is carried out. It is a program that compares scripts and voices to specific conditions to determine whether they match.
 
-### 개발동기
+### 개발 동기
 대부분의 사람들이 필연적으로 발표를 진행하게 되는 상황에 맞닥뜨리게 된다. 
 하지만 대부분의 면접과 발표 상황 등에서는 준비한 대본이나 글을 직접 보면서 진행하기엔 어려운 경우가 많다.
 또한, 대본을 숙지한뒤 비언어적인 표현들과 함께 발표하는 것이 효과적이다. 
-이런 상황에서 대본을 암기하는데 어려움을 겪고 있는 많은 사람들에게 도움을 주고자 다음과 같은 "암기보조프로그램"을 구상하게 되었다.
+이런 상황에서 대본을 암기하는데 어려움을 겪고 있는 많은 사람들에게 도움을 주고자 다음과 같은 **암기보조프로그램**을 구상하게 되었다.
 
 Most people face a situation in which they inevitably proceed with the presentation.
 However, in most interviews and presentations, it is often difficult to proceed while looking at the script or writing prepared.
 Also, it is effective to read the script and present it with nonverbal expressions.
 In order to help many people who have difficulty memorizing scripts in these situations, the following "memorization assistance" was devised.
+
+----------------------------
+### 프로젝트 구조
+```bash
+📂hayanzip
+┣ 📂app
+┃ ┣ 📂migrations
+┃ ┃ ┗ 📜__init__.py
+┃ ┣ 📂static
+┃ ┃ ┗ 📂css
+┃ ┃ ┃ ┗ 📜main.css
+┃ ┣ 📂templates
+┃ ┃ ┗ 📂app
+┃ ┃ ┃ ┗ 📜main.html
+┃ ┣ 📜admin.py
+┃ ┣ 📜apps.py
+┃ ┣ 📜models.py
+┃ ┣ 📜tests.py
+┃ ┣ 📜urls.py
+┃ ┣ 📜views.py
+┃ ┗ 📜__init__.py
+┣ 📂hayanzip
+┃ ┣ 📜asgi.py
+┃ ┣ 📜settings.py
+┃ ┣ 📜urls.py
+┃ ┣ 📜wsgi.py
+┃ ┗ 📜__init__.py
+┣ 📜manage.py
+┗ 📜__init__.py
+```
 
 ----------------------------
 ### 개발 환경
